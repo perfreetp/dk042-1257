@@ -1,0 +1,45 @@
+@use '@/styles/variables.scss' as *;
+
+.wrapper {
+  padding: 0 $page-padding $spacing-md;
+  box-sizing: border-box;
+}
+
+.tabsRow {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+  @include scroll-x-container;
+  overflow-x: auto;
+}
+
+.tab {
+  @include scroll-x-item(auto);
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx $spacing-md;
+  background-color: $color-bg-card;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+  transition: all $transition-fast;
+  border: 1rpx solid transparent;
+}
+
+.active {
+  background-color: $color-primary-bg;
+  color: $color-tag-text;
+  border-color: rgba(43, 127, 255, 0.2);
+  font-weight: $font-weight-medium;
+}
+
+.arrow {
+  margin-left: 4rpx;
+  font-size: 20rpx;
+  transition: transform $transition-fast;
+}
+
+.arrowUp {
+  transform: rotate(180deg);
+}

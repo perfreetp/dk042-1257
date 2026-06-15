@@ -1,0 +1,26 @@
+@use '@/styles/variables.scss' as *;
+
+.wrapper {
+  min-height: 100vh;
+  padding: $spacing-xl $page-padding;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon { font-size: 160rpx; margin-bottom: $spacing-xl; opacity: 0.6; }
+.title { font-size: $font-size-xl; font-weight: $font-weight-semibold; color: $color-text-primary; margin-bottom: $spacing-md; }
+.desc { font-size: $font-size-md; color: $color-text-tertiary; text-align: center; line-height: 1.8; max-width: 520rpx; }
+.tipBox {
+  margin-top: $spacing-xl;
+  padding: $spacing-lg;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  width: 100%;
+  max-width: 600rpx;
+}
+.tipTitle { font-size: $font-size-md; font-weight: $font-weight-semibold; color: $color-primary; margin-bottom: $spacing-md; }
+.tipItem { font-size: $font-size-sm; color: $color-text-secondary; line-height: 2; display: flex; align-items: flex-start; gap: $spacing-sm; }
+.tipDot { color: $color-gold; }

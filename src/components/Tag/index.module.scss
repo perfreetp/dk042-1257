@@ -1,0 +1,48 @@
+@use '@/styles/variables.scss' as *;
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  line-height: 1.4;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.primary {
+  background-color: $color-primary-bg;
+  color: $color-tag-text;
+}
+
+.success {
+  background-color: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+}
+
+.warning {
+  background-color: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+}
+
+.error {
+  background-color: rgba(245, 34, 45, 0.1);
+  color: $color-error;
+}
+
+.gold {
+  background-color: rgba(255, 197, 61, 0.15);
+  color: #d48806;
+}
+
+.teal {
+  background-color: rgba(54, 207, 201, 0.1);
+  color: #08979c;
+}
+
+.gray {
+  background-color: $color-bg-hover;
+  color: $color-text-secondary;
+}

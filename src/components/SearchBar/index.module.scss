@@ -1,0 +1,63 @@
+@use '@/styles/variables.scss' as *;
+
+.wrapper {
+  padding: $spacing-md $page-padding;
+  box-sizing: border-box;
+}
+
+.searchBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 80rpx;
+  background-color: $color-bg-card;
+  border-radius: $radius-button;
+  padding: 0 $spacing-lg;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.icon {
+  font-size: 32rpx;
+  margin-right: $spacing-sm;
+  color: $color-text-tertiary;
+}
+
+.input {
+  flex: 1;
+  height: 100%;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  background: transparent;
+}
+
+.clearBtn {
+  padding: $spacing-xs;
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+}
+
+.typeTabs {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+  @include scroll-x-container;
+  overflow-x: auto;
+}
+
+.typeTab {
+  @include scroll-x-item(auto);
+  padding: 8rpx $spacing-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  background-color: $color-bg-card;
+  color: $color-text-secondary;
+  white-space: nowrap;
+  transition: all $transition-fast;
+}
+
+.active {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}

@@ -1,0 +1,278 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+  box-sizing: border-box;
+}
+
+.tabsBar {
+  display: flex;
+  flex-direction: row;
+  background-color: $color-bg-card;
+  padding: $spacing-sm $page-padding;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.tabItem {
+  flex: 1;
+  text-align: center;
+  padding: $spacing-md 0;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  position: relative;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.activeTab {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48rpx;
+    height: 6rpx;
+    border-radius: 4rpx;
+    background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+  }
+}
+
+.badge {
+  position: absolute;
+  top: 4rpx;
+  right: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  padding: 0 8rpx;
+  border-radius: $radius-round;
+  background-color: $color-error;
+  color: $color-text-white;
+  font-size: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.listArea {
+  padding: $spacing-md $page-padding;
+}
+
+.orderCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  overflow: hidden;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.995);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.orderId {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.statusText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.statusReserved { color: $color-primary; }
+.statusPending { color: $color-warning; }
+.statusCompleted { color: $color-success; }
+.statusReviewed { color: $color-text-tertiary; }
+
+.cardBody {
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+}
+
+.bookCover {
+  width: 160rpx;
+  height: 220rpx;
+  border-radius: $radius-md;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: $color-bg-input;
+}
+
+.coverImg {
+  width: 100%;
+  height: 100%;
+}
+
+.bookInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bookTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: $line-height-tight;
+  @include text-ellipsis-multi(2);
+}
+
+.bookMeta {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+  margin-top: 8rpx;
+  flex-wrap: wrap;
+}
+
+.conditionTag {
+  font-size: $font-size-xs;
+  padding: 2rpx 12rpx;
+  border-radius: $radius-xs;
+  background-color: $color-primary-bg;
+  color: $color-tag-text;
+}
+
+.priceTag {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+  line-height: 1;
+
+  .yuan {
+    font-size: $font-size-xs;
+  }
+}
+
+.originalPrice {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-decoration: line-through;
+  margin-left: $spacing-sm;
+}
+
+.cardFooter {
+  padding: 0 $spacing-lg $spacing-lg;
+}
+
+.appointment {
+  padding: $spacing-md;
+  background: linear-gradient(135deg, $color-primary-bg 0%, #dbeafe 100%);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+}
+
+.appointmentRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: 6rpx;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.appointmentLabel {
+  color: $color-tag-text;
+  font-weight: $font-weight-medium;
+  min-width: 100rpx;
+}
+
+.sellerInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.sellerLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.sellerAvatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  background-color: $color-bg-input;
+}
+
+.sellerName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.sellerCredit {
+  font-size: $font-size-xs;
+  color: $color-gold;
+  margin-left: $spacing-sm;
+}
+
+.actionBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+}
+
+.btn {
+  @include button-reset;
+  padding: 12rpx $spacing-lg;
+  height: 64rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.97);
+  }
+}
+
+.btnOutline {
+  background-color: $color-bg-card;
+  border: 1rpx solid $color-border;
+  color: $color-text-secondary;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border: none;
+}
+
+.btnWarning {
+  background-color: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+  border: 1rpx solid rgba(255, 125, 0, 0.3);
+}

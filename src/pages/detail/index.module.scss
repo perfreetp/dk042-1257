@@ -1,0 +1,449 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 200rpx;
+  box-sizing: border-box;
+}
+
+.swiper {
+  width: 100%;
+  height: 500rpx;
+  background-color: $color-bg-card;
+}
+
+.swiperItem {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.swiperImg {
+  width: 100%;
+  height: 100%;
+}
+
+.swiperDesc {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-lg $page-padding;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+  color: $color-text-white;
+  font-size: $font-size-sm;
+}
+
+.swiperDot {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-lg;
+  padding: 4rpx 16rpx;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: $radius-round;
+  color: $color-text-white;
+  font-size: $font-size-xs;
+}
+
+.contentCard {
+  margin: -40rpx $page-padding $spacing-md;
+  padding: $spacing-lg;
+  background-color: $color-bg-card;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-card;
+  position: relative;
+  z-index: 2;
+}
+
+.priceRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.priceWrap {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-md;
+}
+
+.price {
+  font-size: 64rpx;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+  line-height: 1;
+
+  .yuan {
+    font-size: $font-size-lg;
+    margin-right: 2rpx;
+  }
+}
+
+.originalPrice {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+  text-decoration: line-through;
+  padding-bottom: 6rpx;
+}
+
+.discount {
+  padding: 4rpx 12rpx;
+  background-color: rgba(245, 34, 45, 0.1);
+  color: $color-price;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+}
+
+.viewInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: $line-height-tight;
+  margin-bottom: $spacing-md;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-sm $spacing-lg;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.infoLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.infoValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  @include text-ellipsis;
+}
+
+.noticeBox {
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+  border-left: 6rpx solid $color-success;
+  background-color: rgba(0, 180, 42, 0.05);
+}
+
+.noticeMismatch {
+  border-left-color: $color-warning;
+  background-color: rgba(255, 125, 0, 0.05);
+}
+
+.noticeTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.noticeDesc {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.sectionCard {
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.descText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.locationList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.locationItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.locationIcon {
+  font-size: 32rpx;
+}
+
+.locationText {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.sellerCard {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.sellerAvatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: $radius-round;
+  overflow: hidden;
+  background-color: $color-bg-input;
+  flex-shrink: 0;
+}
+
+.sellerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.sellerName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 6rpx;
+}
+
+.sellerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.sellerBadge {
+  padding: 2rpx 12rpx;
+  border-radius: $radius-xs;
+  background-color: rgba(255, 197, 61, 0.15);
+  color: #d48806;
+  font-weight: $font-weight-medium;
+}
+
+.creditBar {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 8rpx 16rpx;
+  background: linear-gradient(135deg, $color-gold 0%, #ffd666 100%);
+  border-radius: $radius-md;
+}
+
+.creditNum {
+  font-size: 32rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  line-height: 1;
+}
+
+.creditLabel {
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 2rpx;
+}
+
+.recommendList {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  @include scroll-x-container;
+  overflow-x: auto;
+  padding-bottom: $spacing-sm;
+}
+
+.recommendItem {
+  @include scroll-x-item(220rpx);
+  padding: $spacing-sm;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  margin-right: $spacing-md;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.recommendCover {
+  width: 100%;
+  height: 200rpx;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  margin-bottom: $spacing-sm;
+  background-color: $color-bg-input;
+}
+
+.recommendTitle {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  @include text-ellipsis;
+  margin-bottom: 4rpx;
+}
+
+.recommendMeta {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 6rpx;
+}
+
+.recommendPrice {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+
+  .yuan {
+    font-size: $font-size-xs;
+  }
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  background-color: $color-bg-card;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  z-index: 50;
+}
+
+.actionBtns {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  @include button-reset;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: $radius-lg;
+  background-color: $color-bg-page;
+  flex-direction: column;
+  gap: 2rpx;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.95);
+    background-color: $color-bg-hover;
+  }
+}
+
+.actionBtnActive {
+  background-color: rgba(255, 197, 61, 0.15);
+}
+
+.actionIcon {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.actionText {
+  font-size: 18rpx;
+  color: $color-text-secondary;
+}
+
+.mainBtns {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+}
+
+.btn {
+  @include button-reset;
+  height: 88rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnSecondary {
+  flex: 1;
+  background-color: $color-primary-bg;
+  color: $color-tag-text;
+  border: 1rpx solid rgba(43, 127, 255, 0.2);
+}
+
+.btnPrimary {
+  flex: 1.2;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border: none;
+  box-shadow: 0 4rpx 12rpx rgba(43, 127, 255, 0.3);
+}
+
+.btnLarge {
+  flex: 2.5;
+}

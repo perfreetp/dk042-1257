@@ -1,0 +1,153 @@
+@use '@/styles/variables.scss' as *;
+
+.wrapper {
+  padding: $spacing-lg;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.trend {
+  font-size: $font-size-sm;
+  color: $color-success;
+  font-weight: $font-weight-medium;
+}
+
+.chartArea {
+  position: relative;
+  height: 280rpx;
+  margin-top: $spacing-md;
+}
+
+.yAxis {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 40rpx;
+  width: 60rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.yLabel {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  text-align: right;
+  padding-right: 8rpx;
+}
+
+.plotArea {
+  position: absolute;
+  left: 70rpx;
+  right: 0;
+  top: 0;
+  bottom: 40rpx;
+  border-left: 1rpx solid $color-border;
+  border-bottom: 1rpx solid $color-border;
+}
+
+.bars {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 0 10rpx;
+}
+
+.barGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.minBar, .avgBar, .maxBar {
+  width: 14rpx;
+  border-radius: 4rpx 4rpx 0 0;
+  margin-bottom: 2rpx;
+}
+
+.avgBar {
+  background: linear-gradient(180deg, $color-primary 0%, $color-primary-light 100%);
+  width: 24rpx;
+}
+
+.minBar {
+  background-color: rgba(54, 207, 201, 0.7);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.maxBar {
+  background-color: rgba(255, 125, 0, 0.7);
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.priceLabel {
+  font-size: 18rpx;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  margin-bottom: 4rpx;
+}
+
+.xAxis {
+  position: absolute;
+  left: 70rpx;
+  right: 0;
+  bottom: 0;
+  height: 40rpx;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.xLabel {
+  font-size: 20rpx;
+  color: $color-text-secondary;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-lg;
+  margin-top: $spacing-md;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.legendDot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 4rpx;
+  margin-right: 8rpx;
+}
