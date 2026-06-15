@@ -4,6 +4,8 @@ import { mockOrders } from '@/data/orders';
 import { mockBooks, getBookById, mockPriceHistory } from '@/data/books';
 import { mockCurrentUser } from '@/data/users';
 
+export type Role = 'buyer' | 'seller';
+
 export interface BargainRecord {
   id: string;
   bookId: string;
@@ -18,14 +20,23 @@ export interface BargainRecord {
 }
 
 interface AppState {
+  currentUser: typeof mockCurrentUser;
   orders: Order[];
   bargainRecords: BargainRecord[];
   favoriteBookIds: string[];
+  publishedBookIds: string[];
   searchKeyword: string;
   searchType: 'all' | 'title' | 'isbn' | 'course' | 'college';
 
   setSearchKeyword: (kw: string) => void;
   setSearchType: (type: 'all' | 'title' | 'isbn' | 'course' | 'college') => void;
+
+  isBuyer: (order: Order) => boolean;
+  isSeller: (order: Order) => boolean;
+  getOrderRole: (order: Order) => Role;
+
+  getBuyerOrders: () => Order[];
+  getSellerOrders: () => Order[];
 
   createOrder: (bookId: string, options?: Partial<Order>) => Order;
   cancelOrder: (orderId: string) => void;
@@ -42,6 +53,9 @@ interface AppState {
   toggleFavorite: (bookId: string) => boolean;
   isFavorite: (bookId: string) => boolean;
   getBookAvailability: (bookId: string) => 'available' | 'reserved' | 'sold';
+
+  getMyPublishedBooks: () => Book[];
+  getBookOrders: (bookId: string) => Order[];
 
   getPriceHistory: (bookId?: string) => PricePoint[];
 }
@@ -69,15 +83,39 @@ const appendTimeline = (order: Order, node: TimelineNode): Order => {
   return { ...order, timeline: [...order.timeline, node], updateTime: nowStr() };
 };
 
+const initialPublishedIds = mockBooks
+  .filter(b => b.seller.id === mockCurrentUser.id)
+  .map(b => b.id);
+
 export const useAppStore = create<AppState>((set, get) => ({
+  currentUser: mockCurrentUser,
   orders: [...mockOrders],
   bargainRecords: [],
   favoriteBookIds: ['b001', 'b005', 'b008'],
+  publishedBookIds: initialPublishedIds,
   searchKeyword: '',
   searchType: 'all',
 
   setSearchKeyword: (kw) => set({ searchKeyword: kw }),
   setSearchType: (type) => set({ searchType: type }),
+
+  isBuyer: (order) => order.buyer.id === get().currentUser.id,
+  isSeller: (order) => order.seller.id === get().currentUser.id,
+  getOrderRole: (order) => {
+    const user = get().currentUser;
+    if (order.seller.id === user.id) return 'seller';
+    return 'buyer';
+  },
+
+  getBuyerOrders: () => {
+    const user = get().currentUser;
+    return get().orders.filter(o => o.buyer.id === user.id);
+  },
+
+  getSellerOrders: () => {
+    const user = get().currentUser;
+    return get().orders.filter(o => o.seller.id === user.id);
+  },
 
   createOrder: (bookId, options = {}) => {
     const book = getBookById(bookId);
@@ -266,6 +304,17 @@ export const useAppStore = create<AppState>((set, get) => ({
     const hasActive = orders.some(o => o.bookId === bookId && ['reserved', 'approved', 'pending'].includes(o.status));
     if (hasActive) return 'reserved';
     return 'available';
+  },
+
+  getMyPublishedBooks: () => {
+    const { publishedBookIds } = get();
+    return publishedBookIds
+      .map(id => getBookById(id))
+      .filter(Boolean) as Book[];
+  },
+
+  getBookOrders: (bookId) => {
+    return get().orders.filter(o => o.bookId === bookId);
   },
 
   getPriceHistory: (bookId) => {

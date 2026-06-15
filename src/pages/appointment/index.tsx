@@ -3,7 +3,7 @@ import { View, Text, Image, Textarea, Button, ScrollView } from '@tarojs/compone
 import Taro, { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
 import { getBookById } from '@/data/books';
-import type { Book } from '@/types';
+import type { Book, Order, OrderStatus } from '@/types';
 import { useAppStore } from '@/store/app';
 import EmptyState from '@/components/EmptyState';
 import styles from './index.module.scss';
@@ -17,12 +17,42 @@ const timeSlots = [
   '19:00 - 20:00'
 ];
 
+const timelineIcon: Record<string, string> = {
+  reserved: '📝',
+  approved: '✅',
+  pending: '🤝',
+  completed: '📦',
+  reviewed: '⭐',
+  rejected: '❌'
+};
+
+const buyerStatusText: Record<OrderStatus, string> = {
+  reserved: '待卖家确认',
+  approved: '卖家已同意',
+  pending: '待取书',
+  completed: '交易完成',
+  reviewed: '已评价',
+  rejected: '已拒绝'
+};
+
+const sellerStatusText: Record<OrderStatus, string> = {
+  reserved: '新订单待处理',
+  approved: '已同意待确认',
+  pending: '待买家取书',
+  completed: '交易完成',
+  reviewed: '买家已评价',
+  rejected: '已拒绝'
+};
+
 const AppointmentPage: React.FC = () => {
   const router = useRouter();
-  const bookId = router.params.id || 'b001';
-  const book: Book | undefined = useMemo(() => getBookById(bookId), [bookId]);
+  const bookId = router.params.id;
+  const book: Book | undefined = useMemo(() => (bookId ? getBookById(bookId) : undefined), [bookId]);
 
-  const { createOrder } = useAppStore();
+  const {
+    createOrder, orders, getOrderRole, isBuyer, isSeller,
+    approveOrder, rejectOrder, markPending, confirmPickup, cancelOrder
+  } = useAppStore();
 
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState('');
@@ -30,6 +60,8 @@ const AppointmentPage: React.FC = () => {
   const [memo, setMemo] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [viewMode, setViewMode] = useState<'buyer' | 'seller'>('buyer');
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   const dates = useMemo(() => {
     const result = [];
@@ -47,12 +79,27 @@ const AppointmentPage: React.FC = () => {
     return result;
   }, []);
 
+  const myBuyerOrders = useMemo(() => {
+    return orders.filter(o => isBuyer(o) && o.status !== 'rejected');
+  }, [orders]);
+
+  const mySellerOrders = useMemo(() => {
+    return orders.filter(o => isSeller(o) && o.status !== 'rejected');
+  }, [orders]);
+
+  const displayedOrders = viewMode === 'buyer' ? myBuyerOrders : mySellerOrders;
+  const pendingCount = mySellerOrders.filter(o => o.status === 'reserved').length;
+
   const appointmentDateTime = useMemo(() => {
     if (!selectedTime || selectedDate < 0) return '';
     return `${dates[selectedDate].fullDate} ${selectedTime.split(' - ')[0]}`;
   }, [selectedDate, selectedTime, dates]);
 
   const canSubmit = selectedTime && selectedLocation;
+
+  const toggleExpand = (oId: string) => {
+    setExpandedOrderId(expandedOrderId === oId ? null : oId);
+  };
 
   const handleSubmit = () => {
     if (!book) return;
@@ -65,7 +112,7 @@ const AppointmentPage: React.FC = () => {
       return;
     }
 
-    const newOrder = createOrder(bookId, {
+    const newOrder = createOrder(bookId!, {
       appointmentTime: appointmentDateTime,
       pickupLocation: selectedLocation,
       memo: memo || undefined
@@ -87,6 +134,268 @@ const AppointmentPage: React.FC = () => {
     setSelectedLocation('');
     setMemo('');
   };
+
+  const handleOrderAction = (action: string, order: Order) => {
+    const role = getOrderRole(order);
+    switch (action) {
+      case 'cancel':
+        Taro.showModal({
+          title: '取消预订',
+          content: '确定要取消这笔预订吗？频繁取消可能影响信用。',
+          confirmColor: '#f5222d',
+          success: (res) => {
+            if (res.confirm) {
+              cancelOrder(order.id);
+              Taro.showToast({ title: '已取消预订', icon: 'success' });
+            }
+          }
+        });
+        break;
+      case 'approve':
+        approveOrder(order.id);
+        Taro.showToast({ title: '已同意预约', icon: 'success' });
+        break;
+      case 'reject':
+        Taro.showModal({
+          title: '拒绝预约',
+          content: '确定要拒绝买家的预约请求吗？',
+          confirmColor: '#f5222d',
+          editable: true,
+          placeholderText: '可以输入拒绝原因（选填）',
+          success: (res) => {
+            if (res.confirm) {
+              rejectOrder(order.id, res.content || undefined);
+              Taro.showToast({ title: '已拒绝预约', icon: 'success' });
+            }
+          }
+        });
+        break;
+      case 'confirm_arrival':
+        Taro.showModal({
+          title: '确认约好取书',
+          content: '确认卖家已联系，取书时间地点已约定好，订单将进入"待取书"状态。',
+          confirmColor: '#2B7FFF',
+          success: (res) => {
+            if (res.confirm) {
+              markPending(order.id);
+              Taro.showToast({ title: '已推进至待取书', icon: 'success' });
+            }
+          }
+        });
+        break;
+      case 'confirm':
+        Taro.showModal({
+          title: '确认取书',
+          content: '请确认已线下拿到书并完成交易，确认后订单将完成。',
+          confirmColor: '#00b42a',
+          success: (res) => {
+            if (res.confirm) {
+              confirmPickup(order.id);
+              Taro.showToast({ title: '交易已完成', icon: 'success' });
+            }
+          }
+        });
+        break;
+      case 'confirm_seller':
+        Taro.showModal({
+          title: '确认买家已取书',
+          content: '确认买家已线下取书并付款，订单将完成。',
+          confirmColor: '#00b42a',
+          success: (res) => {
+            if (res.confirm) {
+              confirmPickup(order.id);
+              Taro.showToast({ title: '交易已完成', icon: 'success' });
+            }
+          }
+        });
+        break;
+    }
+  };
+
+  const renderOrderCard = (order: Order) => {
+    const isExpanded = expandedOrderId === order.id;
+    const role = getOrderRole(order);
+    const isSellerRole = role === 'seller';
+    const statusText = isSellerRole ? sellerStatusText[order.status] : buyerStatusText[order.status];
+
+    return (
+      <View key={order.id} className={styles.orderCard} onClick={() => toggleExpand(order.id)}>
+        <View className={styles.orderHeader}>
+          <Image className={styles.orderCover} src={order.bookCover} mode="aspectFill" />
+          <View className={styles.orderInfo}>
+            <Text className={styles.orderTitle}>{order.bookTitle}</Text>
+            <View className={styles.orderMeta}>
+              <Text className={styles.orderPrice}>¥{order.bargainPrice || order.bookPrice}</Text>
+              <Text className={styles.orderStatus}>{statusText}</Text>
+            </View>
+          </View>
+          <Text className={styles.orderArrow}>{isExpanded ? '▼' : '▶'}</Text>
+        </View>
+
+        {isExpanded && (
+          <View className={styles.orderExpand}>
+            {(order.appointmentTime || order.pickupLocation) && (
+              <View className={styles.expandAppointment}>
+                {order.appointmentTime && (
+                  <View className={styles.expandRow}>
+                    <Text className={styles.expandLabel}>取书时间</Text>
+                    <Text>{order.appointmentTime}</Text>
+                  </View>
+                )}
+                {order.pickupLocation && (
+                  <View className={styles.expandRow}>
+                    <Text className={styles.expandLabel}>取书地点</Text>
+                    <Text>{order.pickupLocation}</Text>
+                  </View>
+                )}
+                {order.memo && (
+                  <View className={styles.expandRow}>
+                    <Text className={styles.expandLabel}>备注</Text>
+                    <Text>{order.memo}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {order.timeline.length > 0 && (
+              <View className={styles.expandTimeline}>
+                <Text className={styles.expandTimelineTitle}>交易进度</Text>
+                {order.timeline.map((node, idx) => (
+                  <View key={idx} className={styles.timelineMiniItem}>
+                    <View className={styles.timelineMiniLeft}>
+                      <Text>{timelineIcon[node.status] || '📌'}</Text>
+                      {idx < order.timeline.length - 1 && <View className={styles.timelineMiniLine} />}
+                    </View>
+                    <View className={styles.timelineMiniRight}>
+                      <View className={styles.timelineMiniRow}>
+                        <Text className={styles.timelineMiniLabel}>{node.label}</Text>
+                        <Text className={styles.timelineMiniTime}>{node.time}</Text>
+                      </View>
+                      {node.desc && <Text className={styles.timelineMiniDesc}>{node.desc}</Text>}
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            <View className={styles.expandActions}>
+              <Button
+                className={classnames(styles.btn, styles.btnOutline, styles.btnSmall)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  Taro.navigateTo({ url: `/pages/detail/index?id=${order.bookId}` });
+                }}
+              >
+                查看教材
+              </Button>
+              {role === 'buyer' && (
+                <>
+                  {order.status === 'reserved' && (
+                    <Button
+                      className={classnames(styles.btn, styles.btnWarning, styles.btnSmall)}
+                      onClick={(e) => { e.stopPropagation(); handleOrderAction('cancel', order); }}
+                    >
+                      取消
+                    </Button>
+                  )}
+                  {order.status === 'approved' && (
+                    <Button
+                      className={classnames(styles.btn, styles.btnPrimary, styles.btnSmall)}
+                      onClick={(e) => { e.stopPropagation(); handleOrderAction('confirm_arrival', order); }}
+                    >
+                      确认约好
+                    </Button>
+                  )}
+                  {order.status === 'pending' && (
+                    <Button
+                      className={classnames(styles.btn, styles.btnPrimary, styles.btnSmall)}
+                      onClick={(e) => { e.stopPropagation(); handleOrderAction('confirm', order); }}
+                    >
+                      确认取书
+                    </Button>
+                  )}
+                </>
+              )}
+              {role === 'seller' && (
+                <>
+                  {order.status === 'reserved' && (
+                    <>
+                      <Button
+                        className={classnames(styles.btn, styles.btnSuccess, styles.btnSmall)}
+                        onClick={(e) => { e.stopPropagation(); handleOrderAction('approve', order); }}
+                      >
+                        同意
+                      </Button>
+                      <Button
+                        className={classnames(styles.btn, styles.btnWarning, styles.btnSmall)}
+                        onClick={(e) => { e.stopPropagation(); handleOrderAction('reject', order); }}
+                      >
+                        拒绝
+                      </Button>
+                    </>
+                  )}
+                  {order.status === 'pending' && (
+                    <Button
+                      className={classnames(styles.btn, styles.btnPrimary, styles.btnSmall)}
+                      onClick={(e) => { e.stopPropagation(); handleOrderAction('confirm_seller', order); }}
+                    >
+                      确认已取书
+                    </Button>
+                  )}
+                </>
+              )}
+            </View>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  if (!bookId) {
+    return (
+      <ScrollView className={styles.page} scrollY>
+        <View className={styles.listHeader}>
+          <Text className={styles.listTitle}>📅 预约验书</Text>
+          <Text className={styles.listDesc}>管理你的预约记录和待处理事项</Text>
+        </View>
+
+        <View className={styles.viewSwitcher}>
+          <View
+            className={classnames(styles.viewTab, viewMode === 'buyer' && styles.activeViewTab)}
+            onClick={() => setViewMode('buyer')}
+          >
+            <Text>我发起的</Text>
+            {myBuyerOrders.length > 0 && (
+              <View className={styles.viewBadge}><Text>{myBuyerOrders.length}</Text></View>
+            )}
+          </View>
+          <View
+            className={classnames(styles.viewTab, viewMode === 'seller' && styles.activeViewTab)}
+            onClick={() => setViewMode('seller')}
+          >
+            <Text>我收到的</Text>
+            {pendingCount > 0 && (
+              <View className={styles.viewBadgeDot}><Text>{pendingCount}</Text></View>
+            )}
+          </View>
+        </View>
+
+        <View className={styles.listSection}>
+          {displayedOrders.length === 0 ? (
+            <EmptyState
+              icon="📅"
+              title={viewMode === 'buyer' ? '暂无预约记录' : '暂无待处理预约'}
+              desc={viewMode === 'buyer' ? '去首页逛逛，发起第一笔预约吧~' : '还没有买家预约你的教材~'}
+            />
+          ) : (
+            <View className={styles.orderList}>
+              {displayedOrders.map(order => renderOrderCard(order))}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    );
+  }
 
   if (!book) {
     return (

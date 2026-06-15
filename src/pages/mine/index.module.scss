@@ -301,6 +301,377 @@
   }
 }
 
+.btn {
+  @include button-reset;
+  height: 64rpx;
+  line-height: 62rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.btnOutline {
+  background-color: transparent;
+  color: $color-text-secondary;
+  border: 2rpx solid $color-divider;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border: none;
+}
+
+.btnWarning {
+  background-color: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+  border: 1rpx solid rgba(255, 125, 0, 0.3);
+}
+
+.btnSuccess {
+  background-color: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+  border: 1rpx solid rgba(0, 180, 42, 0.3);
+}
+
+.btnSmall {
+  height: 56rpx;
+  line-height: 54rpx;
+  padding: 0 $spacing-sm;
+  font-size: $font-size-xs;
+}
+
+.orderGroup {
+  margin-bottom: $spacing-lg;
+}
+
+.orderGroupHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md 0;
+}
+
+.orderGroupIcon {
+  font-size: 36rpx;
+}
+
+.orderGroupLabel {
+  flex: 1;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.orderGroupBadge {
+  min-width: 40rpx;
+  height: 40rpx;
+  padding: 0 12rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.orderGroupList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.orderMiniCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.orderMiniHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: $spacing-md;
+  gap: $spacing-md;
+}
+
+.orderMiniCover {
+  width: 100rpx;
+  height: 140rpx;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.orderMiniInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.orderMiniTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.orderMiniMeta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-top: 8rpx;
+}
+
+.orderMiniPrice {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+}
+
+.orderMiniStatus {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  padding: 2rpx 12rpx;
+  background-color: $color-bg-hover;
+  border-radius: 16rpx;
+}
+
+.orderArrow {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.orderExpand {
+  padding: 0 $spacing-md $spacing-md;
+  border-top: 2rpx solid $color-divider;
+}
+
+.expandAppointment {
+  padding: $spacing-md 0;
+}
+
+.expandRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: $spacing-md;
+  margin-bottom: 8rpx;
+}
+
+.expandLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  width: 120rpx;
+  flex-shrink: 0;
+}
+
+.expandRow Text:last-child {
+  flex: 1;
+  font-size: $font-size-xs;
+  color: $color-text-primary;
+  line-height: 1.5;
+}
+
+.expandParty {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+  border-top: 2rpx solid $color-divider;
+}
+
+.expandPartyLeft {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+  min-width: 0;
+}
+
+.expandAvatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 32rpx;
+  flex-shrink: 0;
+}
+
+.expandName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.expandSub {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.expandTimeline {
+  padding: $spacing-md 0;
+  border-top: 2rpx solid $color-divider;
+}
+
+.timelineMiniItem {
+  display: flex;
+  flex-direction: row;
+  min-height: 60rpx;
+}
+
+.timelineMiniLeft {
+  width: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 24rpx;
+  line-height: 40rpx;
+}
+
+.timelineMiniLine {
+  width: 4rpx;
+  flex: 1;
+  background-color: $color-divider;
+  min-height: 20rpx;
+}
+
+.timelineMiniRight {
+  flex: 1;
+  padding-left: $spacing-sm;
+  padding-bottom: $spacing-sm;
+  min-width: 0;
+}
+
+.timelineMiniRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.timelineMiniLabel {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.timelineMiniTime {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.timelineMiniDesc {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+  line-height: 1.4;
+}
+
+.expandActions {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 2rpx solid $color-divider;
+  justify-content: flex-end;
+}
+
+.publishList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.publishItem {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+}
+
+.publishCover {
+  width: 100rpx;
+  height: 140rpx;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.publishInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.publishTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.publishMeta {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.publishStatusRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.publishTag {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+}
+
+.tagAvailable {
+  background-color: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+}
+
+.tagReserved {
+  background-color: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+}
+
+.tagSold {
+  background-color: rgba(245, 34, 45, 0.1);
+  color: $color-error;
+}
+
+.publishPrice {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+  margin-left: auto;
+}
+
+.publishOrders {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  margin-top: 4rpx;
+}
+
 .iconBlue { background-color: rgba(43, 127, 255, 0.1); }
 .iconGold { background-color: rgba(255, 197, 61, 0.15); }
 .iconGreen { background-color: rgba(0, 180, 42, 0.1); }

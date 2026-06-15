@@ -425,3 +425,294 @@
     opacity: 0.85;
   }
 }
+
+.btnWarning {
+  background-color: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+  border: 1rpx solid rgba(255, 125, 0, 0.3);
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.btnSuccess {
+  background-color: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+  border: 1rpx solid rgba(0, 180, 42, 0.3);
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.btnSmall {
+  height: 56rpx;
+  line-height: 54rpx;
+  padding: 0 $spacing-sm;
+  font-size: $font-size-xs;
+}
+
+.listHeader {
+  padding: $spacing-lg $page-padding $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+}
+
+.listTitle {
+  font-size: 36rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  display: block;
+}
+
+.listDesc {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 8rpx;
+  display: block;
+}
+
+.viewSwitcher {
+  display: flex;
+  flex-direction: row;
+  padding: $spacing-md $page-padding;
+  background-color: $color-bg-card;
+  gap: $spacing-md;
+}
+
+.viewTab {
+  flex: 1;
+  text-align: center;
+  padding: $spacing-sm 0;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  background-color: $color-bg-hover;
+  border-radius: $radius-sm;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  position: relative;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.activeViewTab {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+  box-shadow: $shadow-card;
+}
+
+.viewBadge {
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 10rpx;
+  background-color: $color-price;
+  color: $color-text-white;
+  border-radius: 18rpx;
+  font-size: 20rpx;
+  font-weight: $font-weight-semibold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewBadgeDot {
+  width: 36rpx;
+  height: 36rpx;
+  background-color: $color-error;
+  color: $color-text-white;
+  border-radius: 18rpx;
+  font-size: 20rpx;
+  font-weight: $font-weight-semibold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.listSection {
+  padding: $spacing-md $page-padding;
+}
+
+.orderList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.orderCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.orderHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: $spacing-md;
+  gap: $spacing-md;
+}
+
+.orderCover {
+  width: 90rpx;
+  height: 126rpx;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.orderInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.orderTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.orderMeta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-top: 8rpx;
+}
+
+.orderPrice {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+}
+
+.orderStatus {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  padding: 2rpx 12rpx;
+  background-color: $color-bg-hover;
+  border-radius: 16rpx;
+}
+
+.orderArrow {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.orderExpand {
+  padding: 0 $spacing-md $spacing-md;
+  border-top: 2rpx solid $color-divider;
+}
+
+.expandAppointment {
+  padding: $spacing-md 0;
+}
+
+.expandRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: $spacing-md;
+  margin-bottom: 8rpx;
+}
+
+.expandLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  width: 120rpx;
+  flex-shrink: 0;
+}
+
+.expandRow Text:last-child {
+  flex: 1;
+  font-size: $font-size-xs;
+  color: $color-text-primary;
+  line-height: 1.5;
+}
+
+.expandTimeline {
+  padding: $spacing-md 0;
+  border-top: 2rpx solid $color-divider;
+}
+
+.expandTimelineTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.timelineMiniItem {
+  display: flex;
+  flex-direction: row;
+  min-height: 60rpx;
+}
+
+.timelineMiniLeft {
+  width: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 24rpx;
+  line-height: 40rpx;
+}
+
+.timelineMiniLine {
+  width: 4rpx;
+  flex: 1;
+  background-color: $color-divider;
+  min-height: 20rpx;
+}
+
+.timelineMiniRight {
+  flex: 1;
+  padding-left: $spacing-sm;
+  padding-bottom: $spacing-sm;
+  min-width: 0;
+}
+
+.timelineMiniRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.timelineMiniLabel {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.timelineMiniTime {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.timelineMiniDesc {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+  line-height: 1.4;
+}
+
+.expandActions {
+  display: flex;
+  flex-direction: row;
+  gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 2rpx solid $color-divider;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}

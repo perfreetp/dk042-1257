@@ -16,12 +16,21 @@ const STATUS_TABS: { key: OrderStatus | 'all'; label: string }[] = [
   { key: 'reviewed', label: '已评价' }
 ];
 
-const statusDisplay: Record<OrderStatus, { text: string; cls: string }> = {
-  reserved: { text: '🕐 待卖家确认', cls: styles.statusReserved },
+const buyerStatusText: Record<OrderStatus, { text: string; cls: string }> = {
+  reserved: { text: '🕐 等待卖家确认', cls: styles.statusReserved },
   approved: { text: '✓ 卖家已同意', cls: styles.statusApproved },
   pending: { text: '⏰ 待取书', cls: styles.statusPending },
   completed: { text: '📦 交易完成', cls: styles.statusCompleted },
   reviewed: { text: '⭐ 已评价', cls: styles.statusReviewed },
+  rejected: { text: '✕ 卖家已拒绝', cls: styles.statusRejected }
+};
+
+const sellerStatusText: Record<OrderStatus, { text: string; cls: string }> = {
+  reserved: { text: '🔔 新订单待处理', cls: styles.statusReserved },
+  approved: { text: '✓ 已同意待确认', cls: styles.statusApproved },
+  pending: { text: '⏰ 待买家取书', cls: styles.statusPending },
+  completed: { text: '📦 交易完成', cls: styles.statusCompleted },
+  reviewed: { text: '⭐ 买家已评价', cls: styles.statusReviewed },
   rejected: { text: '✕ 已拒绝', cls: styles.statusRejected }
 };
 
@@ -36,30 +45,41 @@ const timelineIcon: Record<string, string> = {
 
 const OrdersPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>('all');
+  const [viewMode, setViewMode] = useState<'all' | 'buyer' | 'seller'>('all');
   const {
     orders, cancelOrder, approveOrder, rejectOrder,
     rescheduleOrder, markPending, confirmPickup,
-    reviewOrder, updateOrderMemo
+    reviewOrder, updateOrderMemo, isBuyer, isSeller, getOrderRole
   } = useAppStore();
 
-  const displayedOrders = useMemo(() => {
-    if (activeTab === 'all') return orders.filter(o => o.status !== 'rejected');
-    return orders.filter(o => o.status === activeTab);
-  }, [orders, activeTab]);
+  const filteredOrders = useMemo(() => {
+    let list = orders.filter(o => o.status !== 'rejected');
+    if (viewMode === 'buyer') {
+      list = list.filter(o => isBuyer(o));
+    } else if (viewMode === 'seller') {
+      list = list.filter(o => isSeller(o));
+    }
+    if (activeTab === 'all') return list;
+    return list.filter(o => o.status === activeTab);
+  }, [orders, activeTab, viewMode, isBuyer, isSeller]);
 
   const badgeCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     STATUS_TABS.forEach(tab => {
+      let list = orders.filter(o => o.status !== 'rejected');
+      if (viewMode === 'buyer') list = list.filter(o => isBuyer(o));
+      if (viewMode === 'seller') list = list.filter(o => isSeller(o));
       if (tab.key === 'all') {
-        counts['all'] = orders.filter(o => o.status !== 'rejected').length;
+        counts['all'] = list.length;
       } else {
-        counts[tab.key] = orders.filter(o => o.status === tab.key).length;
+        counts[tab.key] = list.filter(o => o.status === tab.key).length;
       }
     });
     return counts;
-  }, [orders]);
+  }, [orders, viewMode, isBuyer, isSeller]);
 
   const handleAction = (action: string, order: Order) => {
+    const role = getOrderRole(order);
     switch (action) {
       case 'cancel':
         Taro.showModal({
@@ -128,6 +148,19 @@ const OrdersPage: React.FC = () => {
             if (res.confirm) {
               markPending(order.id);
               Taro.showToast({ title: '已推进至待取书', icon: 'success' });
+            }
+          }
+        });
+        break;
+      case 'confirm_seller':
+        Taro.showModal({
+          title: '确认买家已取书',
+          content: '确认买家已线下取书并付款，订单将完成。',
+          confirmColor: '#00b42a',
+          success: (res) => {
+            if (res.confirm) {
+              confirmPickup(order.id);
+              Taro.showToast({ title: '交易已完成', icon: 'success' });
             }
           }
         });
@@ -201,11 +234,141 @@ const OrdersPage: React.FC = () => {
       case 'detail':
         Taro.navigateTo({ url: `/pages/detail/index?id=${order.bookId}` });
         break;
+      case 'contact':
+        Taro.showActionSheet({
+          itemList: ['复制微信号', '复制手机号', '发起站内消息'],
+          success: (res) => {
+            Taro.setClipboardData({ data: 'test_contact_123', success: () => Taro.showToast({ title: '已复制', icon: 'success' }) });
+          }
+        });
+        break;
     }
+  };
+
+  const getStatusText = (order: Order) => {
+    return isSeller(order) ? sellerStatusText[order.status] : buyerStatusText[order.status];
+  };
+
+  const renderActionBar = (order: Order) => {
+    const role = getOrderRole(order);
+    const isSellerRole = role === 'seller';
+
+    return (
+      <View className={styles.actionBar}>
+        <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('memo', order)}>
+          更多
+        </Button>
+        {role === 'buyer' && (
+          <>
+            {order.status === 'reserved' && (
+              <Button className={classnames(styles.btn, styles.btnWarning)} onClick={() => handleAction('cancel', order)}>
+                取消
+              </Button>
+            )}
+            {order.status === 'approved' && (
+              <>
+                <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('confirm_arrival', order)}>
+                  确认约好
+                </Button>
+                <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('contact', order)}>
+                  联系卖家
+                </Button>
+                <Button className={classnames(styles.btn, styles.btnWarning)} onClick={() => handleAction('cancel', order)}>
+                  取消
+                </Button>
+              </>
+            )}
+            {order.status === 'pending' && (
+              <>
+                <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('confirm', order)}>
+                  确认取书
+                </Button>
+                <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('reschedule', order)}>
+                  改约
+                </Button>
+              </>
+            )}
+            {order.status === 'completed' && (
+              <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('review', order)}>
+                去评价
+              </Button>
+            )}
+            {order.status === 'reviewed' && (
+              <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('detail', order)}>
+                再看看
+              </Button>
+            )}
+          </>
+        )}
+        {role === 'seller' && (
+          <>
+            {order.status === 'reserved' && (
+              <>
+                <Button className={classnames(styles.btn, styles.btnSuccess)} onClick={() => handleAction('approve', order)}>
+                  同意
+                </Button>
+                <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('approve_reschedule', order)}>
+                  同意改约
+                </Button>
+                <Button className={classnames(styles.btn, styles.btnWarning)} onClick={() => handleAction('reject', order)}>
+                  拒绝
+                </Button>
+              </>
+            )}
+            {order.status === 'approved' && (
+              <>
+                <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('contact', order)}>
+                  联系买家
+                </Button>
+                <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('reschedule', order)}>
+                  改约
+                </Button>
+              </>
+            )}
+            {order.status === 'pending' && (
+              <>
+                <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('confirm_seller', order)}>
+                  确认已取书
+                </Button>
+                <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('reschedule', order)}>
+                  改约
+                </Button>
+              </>
+            )}
+            {(order.status === 'completed' || order.status === 'reviewed') && (
+              <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('detail', order)}>
+                查看详情
+              </Button>
+            )}
+          </>
+        )}
+      </View>
+    );
   };
 
   return (
     <View className={styles.page}>
+      <View className={styles.viewSwitcher}>
+        <View
+          className={classnames(styles.viewTab, viewMode === 'all' && styles.activeViewTab)}
+          onClick={() => setViewMode('all')}
+        >
+          <Text>全部</Text>
+        </View>
+        <View
+          className={classnames(styles.viewTab, viewMode === 'buyer' && styles.activeViewTab)}
+          onClick={() => setViewMode('buyer')}
+        >
+          <Text>我买的</Text>
+        </View>
+        <View
+          className={classnames(styles.viewTab, viewMode === 'seller' && styles.activeViewTab)}
+          onClick={() => setViewMode('seller')}
+        >
+          <Text>我卖的</Text>
+        </View>
+      </View>
+
       <ScrollView className={styles.tabsBar} scrollX>
         {STATUS_TABS.map(tab => {
           const count = badgeCounts[tab.key] || 0;
@@ -230,154 +393,119 @@ const OrdersPage: React.FC = () => {
       </ScrollView>
 
       <ScrollView className={styles.listArea} scrollY>
-        {displayedOrders.length === 0 ? (
+        {filteredOrders.length === 0 ? (
           <EmptyState
             icon="📋"
             title="暂无订单"
-            desc="去首页逛逛，找到心仪的教材吧~"
+            desc={viewMode === 'seller' ? '还没有买家预约你的教材，去首页逛逛吧~' : '去首页逛逛，找到心仪的教材吧~'}
           />
         ) : (
-          displayedOrders.map(order => (
-            <View key={order.id} className={styles.orderCard}>
-              <View className={styles.cardHeader}>
-                <Text className={styles.orderId}>订单号：{order.id}</Text>
-                <Text className={classnames(styles.statusText, statusDisplay[order.status]?.cls)}>
-                  {statusDisplay[order.status]?.text}
-                </Text>
-              </View>
-
-              <View className={styles.cardBody}>
-                <View className={styles.bookCover} onClick={() => handleAction('detail', order)}>
-                  <Image className={styles.coverImg} src={order.bookCover} mode="aspectFill" />
+          filteredOrders.map(order => {
+            const statusInfo = getStatusText(order);
+            const isSellerRole = isSeller(order);
+            const counterParty = isSellerRole ? order.buyer : order.seller;
+            return (
+              <View key={order.id} className={styles.orderCard}>
+                <View className={styles.cardHeader}>
+                  <Text className={styles.orderId}>订单号：{order.id} · {isSellerRole ? '我是卖家' : '我是买家'}</Text>
+                  <Text className={classnames(styles.statusText, statusInfo?.cls)}>
+                    {statusInfo?.text}
+                  </Text>
                 </View>
-                <View className={styles.bookInfo}>
-                  <View>
-                    <Text className={styles.bookTitle}>{order.bookTitle}</Text>
-                    <View className={styles.bookMeta}>
-                      <Text className={styles.conditionTag}>{order.condition}</Text>
-                      {order.bargainPrice && (
-                        <Text className={styles.conditionTag} style={{ backgroundColor: 'rgba(255,125,0,0.1)', color: '#ff7d00' }}>
-                          砍价后
-                        </Text>
-                      )}
+
+                <View className={styles.cardBody}>
+                  <View className={styles.bookCover} onClick={() => handleAction('detail', order)}>
+                    <Image className={styles.coverImg} src={order.bookCover} mode="aspectFill" />
+                  </View>
+                  <View className={styles.bookInfo}>
+                    <View>
+                      <Text className={styles.bookTitle}>{order.bookTitle}</Text>
+                      <View className={styles.bookMeta}>
+                        <Text className={styles.conditionTag}>{order.condition}</Text>
+                        {order.bargainPrice && (
+                          <Text className={styles.conditionTag} style={{ backgroundColor: 'rgba(255,125,0,0.1)', color: '#ff7d00' }}>
+                            砍价后
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                    <View>
+                      <Text className={styles.priceTag}>
+                        <Text className={styles.yuan}>¥</Text>{order.bargainPrice || order.bookPrice}
+                      </Text>
+                      <Text className={styles.originalPrice}>原价 ¥{order.bookPrice}</Text>
                     </View>
                   </View>
-                  <View>
-                    <Text className={styles.priceTag}>
-                      <Text className={styles.yuan}>¥</Text>{order.bargainPrice || order.bookPrice}
-                    </Text>
-                    <Text className={styles.originalPrice}>原价 ¥{order.bookPrice}</Text>
-                  </View>
                 </View>
-              </View>
 
-              <View className={styles.cardFooter}>
-                {(order.appointmentTime || order.pickupLocation) && (
-                  <View className={styles.appointment}>
-                    {order.appointmentTime && (
-                      <View className={styles.appointmentRow}>
-                        <Text className={styles.appointmentLabel}>取书时间</Text>
-                        <Text>{order.appointmentTime}</Text>
-                      </View>
-                    )}
-                    {order.pickupLocation && (
-                      <View className={styles.appointmentRow}>
-                        <Text className={styles.appointmentLabel}>取书地点</Text>
-                        <Text>{order.pickupLocation}</Text>
-                      </View>
-                    )}
-                    {order.memo && (
-                      <View className={styles.appointmentRow}>
-                        <Text className={styles.appointmentLabel}>备忘</Text>
-                        <Text>{order.memo}</Text>
-                      </View>
-                    )}
-                  </View>
-                )}
-
-                {order.timeline.length > 0 && (
-                  <View className={styles.timelineSection}>
-                    <Text className={styles.timelineTitle}>交易进度</Text>
-                    {order.timeline.map((node, idx) => (
-                      <View key={idx} className={styles.timelineItem}>
-                        <View className={styles.timelineLeft}>
-                          <Text className={styles.timelineIcon}>{timelineIcon[node.status] || '📌'}</Text>
-                          {idx < order.timeline.length - 1 && <View className={styles.timelineLine} />}
+                <View className={styles.cardFooter}>
+                  {(order.appointmentTime || order.pickupLocation) && (
+                    <View className={styles.appointment}>
+                      {order.appointmentTime && (
+                        <View className={styles.appointmentRow}>
+                          <Text className={styles.appointmentLabel}>取书时间</Text>
+                          <Text>{order.appointmentTime}</Text>
                         </View>
-                        <View className={styles.timelineRight}>
-                          <View className={styles.timelineRow}>
-                            <Text className={styles.timelineLabel}>{node.label}</Text>
-                            <Text className={styles.timelineTime}>{node.time}</Text>
+                      )}
+                      {order.pickupLocation && (
+                        <View className={styles.appointmentRow}>
+                          <Text className={styles.appointmentLabel}>取书地点</Text>
+                          <Text>{order.pickupLocation}</Text>
+                        </View>
+                      )}
+                      {order.memo && (
+                        <View className={styles.appointmentRow}>
+                          <Text className={styles.appointmentLabel}>备忘</Text>
+                          <Text>{order.memo}</Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+
+                  <View className={styles.counterParty}>
+                    <View className={styles.partyLeft}>
+                      <Image className={styles.partyAvatar} src={counterParty.avatar} mode="aspectFill" />
+                      <View className={styles.partyInfo}>
+                        <Text className={styles.partyName}>{counterParty.name}</Text>
+                        <Text className={styles.partySub}>
+                          {isSellerRole ? '买家' : '卖家'} · ★{counterParty.creditScore}
+                        </Text>
+                      </View>
+                    </View>
+                    <Button
+                      className={classnames(styles.btn, styles.btnOutline, styles.contactBtn)}
+                      onClick={() => handleAction('contact', order)}
+                    >
+                      联系
+                    </Button>
+                  </View>
+
+                  {order.timeline.length > 0 && (
+                    <View className={styles.timelineSection}>
+                      <Text className={styles.timelineTitle}>交易进度</Text>
+                      {order.timeline.map((node, idx) => (
+                        <View key={idx} className={styles.timelineItem}>
+                          <View className={styles.timelineLeft}>
+                            <Text className={styles.timelineIcon}>{timelineIcon[node.status] || '📌'}</Text>
+                            {idx < order.timeline.length - 1 && <View className={styles.timelineLine} />}
                           </View>
-                          {node.desc && <Text className={styles.timelineDesc}>{node.desc}</Text>}
+                          <View className={styles.timelineRight}>
+                            <View className={styles.timelineRow}>
+                              <Text className={styles.timelineLabel}>{node.label}</Text>
+                              <Text className={styles.timelineTime}>{node.time}</Text>
+                            </View>
+                            {node.desc && <Text className={styles.timelineDesc}>{node.desc}</Text>}
+                          </View>
                         </View>
-                      </View>
-                    ))}
-                  </View>
-                )}
+                      ))}
+                    </View>
+                  )}
 
-                <View className={styles.sellerInfo}>
-                  <View className={styles.sellerLeft}>
-                    <Image className={styles.sellerAvatar} src={order.seller.avatar} mode="aspectFill" />
-                    <Text className={styles.sellerName}>{order.seller.name}</Text>
-                    <Text className={styles.sellerCredit}>★{order.seller.creditScore}</Text>
-                  </View>
-                </View>
-
-                <View className={styles.actionBar}>
-                  <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('memo', order)}>
-                    更多
-                  </Button>
-                  {order.status === 'reserved' && (
-                    <>
-                      <Button className={classnames(styles.btn, styles.btnSuccess)} onClick={() => handleAction('approve', order)}>
-                        同意
-                      </Button>
-                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('approve_reschedule', order)}>
-                        同意改约
-                      </Button>
-                      <Button className={classnames(styles.btn, styles.btnWarning)} onClick={() => handleAction('reject', order)}>
-                        拒绝
-                      </Button>
-                    </>
-                  )}
-                  {order.status === 'approved' && (
-                    <>
-                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('confirm_arrival', order)}>
-                        确认约好
-                      </Button>
-                      <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('reschedule', order)}>
-                        改约
-                      </Button>
-                      <Button className={classnames(styles.btn, styles.btnWarning)} onClick={() => handleAction('cancel', order)}>
-                        取消
-                      </Button>
-                    </>
-                  )}
-                  {order.status === 'pending' && (
-                    <>
-                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('confirm', order)}>
-                        确认取书
-                      </Button>
-                      <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('reschedule', order)}>
-                        改约
-                      </Button>
-                    </>
-                  )}
-                  {order.status === 'completed' && (
-                    <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('review', order)}>
-                      去评价
-                    </Button>
-                  )}
-                  {order.status === 'reviewed' && (
-                    <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('detail', order)}>
-                      再看看
-                    </Button>
-                  )}
+                  {renderActionBar(order)}
                 </View>
               </View>
-            </View>
-          ))
+            );
+          })
         )}
       </ScrollView>
     </View>

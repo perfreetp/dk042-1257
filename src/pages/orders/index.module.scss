@@ -6,13 +6,46 @@
   box-sizing: border-box;
 }
 
+.viewSwitcher {
+  display: flex;
+  flex-direction: row;
+  background-color: $color-bg-card;
+  padding: $spacing-md $page-padding $spacing-sm;
+  gap: $spacing-sm;
+  position: sticky;
+  top: 0;
+  z-index: 11;
+}
+
+.viewTab {
+  flex: 1;
+  text-align: center;
+  padding: $spacing-sm 0;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  background-color: $color-bg-hover;
+  border-radius: $radius-sm;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.activeViewTab {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+  box-shadow: $shadow-card;
+}
+
 .tabsBar {
   display: flex;
   flex-direction: row;
   background-color: $color-bg-card;
   padding: $spacing-sm $page-padding;
   position: sticky;
-  top: 0;
+  top: 88rpx;
   z-index: 10;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
 }
@@ -360,4 +393,55 @@
   color: $color-text-secondary;
   margin-top: 4rpx;
   line-height: 1.5;
+}
+
+.counterParty {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+  border-top: 2rpx solid $color-divider;
+  margin-bottom: $spacing-md;
+}
+
+.partyLeft {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: $spacing-sm;
+  min-width: 0;
+}
+
+.partyAvatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 36rpx;
+  flex-shrink: 0;
+}
+
+.partyInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.partyName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.partySub {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.contactBtn {
+  padding: 0 $spacing-md;
+  height: 56rpx;
+  line-height: 54rpx;
+  font-size: $font-size-xs;
 }
