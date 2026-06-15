@@ -101,9 +101,11 @@
 }
 
 .statusReserved { color: $color-primary; }
+.statusApproved { color: #00b42a; }
 .statusPending { color: $color-warning; }
 .statusCompleted { color: $color-success; }
 .statusReviewed { color: $color-text-tertiary; }
+.statusRejected { color: $color-error; }
 
 .cardBody {
   padding: $spacing-lg;
@@ -275,4 +277,87 @@
   background-color: rgba(255, 125, 0, 0.1);
   color: $color-warning;
   border: 1rpx solid rgba(255, 125, 0, 0.3);
+}
+
+.btnSuccess {
+  background-color: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+  border: 1rpx solid rgba(0, 180, 42, 0.3);
+}
+
+.timelineSection {
+  margin-bottom: $spacing-md;
+  padding: $spacing-md;
+  background-color: $color-bg-hover;
+  border-radius: $radius-md;
+}
+
+.timelineTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.timelineItem {
+  display: flex;
+  flex-direction: row;
+  min-height: 72rpx;
+}
+
+.timelineLeft {
+  width: 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.timelineIcon {
+  font-size: 28rpx;
+  line-height: 48rpx;
+  text-align: center;
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.timelineLine {
+  width: 4rpx;
+  flex: 1;
+  background-color: $color-divider;
+  min-height: 24rpx;
+}
+
+.timelineRight {
+  flex: 1;
+  padding-left: $spacing-sm;
+  padding-bottom: $spacing-md;
+  min-width: 0;
+}
+
+.timelineRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.timelineLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.timelineTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.timelineDesc {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+  line-height: 1.5;
 }

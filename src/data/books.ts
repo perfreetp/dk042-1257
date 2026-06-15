@@ -1,5 +1,6 @@
 import type { Book } from '@/types';
 import { mockSellers } from './users';
+import { mockColleges } from './colleges';
 
 const bookImageMap: Record<string, number[]> = {
   tech: [1, 2, 3, 6, 8, 9, 119, 160, 201],
@@ -437,9 +438,21 @@ export const getBookById = (id: string): Book | undefined => {
   return mockBooks.find(book => book.id === id);
 };
 
-export const getBooksByCourse = (courseCode: string): Book[] => {
-  const code = courseCode.toUpperCase();
-  return mockBooks.filter(book => book.courseCode.toUpperCase() === code);
+export const getBooksByCourse = (courseIdOrCode: string): Book[] => {
+  const code = courseIdOrCode.toUpperCase();
+  const byCode = mockBooks.filter(book => book.courseCode.toUpperCase() === code);
+  if (byCode.length > 0) return byCode;
+  const courseName = mockColleges
+    .flatMap(c => c.courses)
+    .find(c => c.id === courseIdOrCode || c.code.toUpperCase() === code);
+  if (courseName) {
+    return mockBooks.filter(book =>
+      book.course === courseName.name || book.courseCode.toUpperCase() === courseName.code.toUpperCase()
+    );
+  }
+  return mockBooks.filter(book =>
+    book.courseCode.toUpperCase() === code || book.course === courseIdOrCode
+  );
 };
 
 export const getBooksByCollege = (college: string): Book[] => {

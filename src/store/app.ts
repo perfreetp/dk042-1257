@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Order, Book, PricePoint } from '@/types';
+import type { Order, Book, PricePoint, TimelineNode, OrderStatus } from '@/types';
 import { mockOrders } from '@/data/orders';
 import { mockBooks, getBookById, mockPriceHistory } from '@/data/books';
 import { mockCurrentUser } from '@/data/users';
@@ -29,6 +29,9 @@ interface AppState {
 
   createOrder: (bookId: string, options?: Partial<Order>) => Order;
   cancelOrder: (orderId: string) => void;
+  approveOrder: (orderId: string, newTime?: string, newLocation?: string) => void;
+  rejectOrder: (orderId: string, reason?: string) => void;
+  rescheduleOrder: (orderId: string, newTime: string, newLocation: string) => void;
   markPending: (orderId: string) => void;
   confirmPickup: (orderId: string) => void;
   reviewOrder: (orderId: string) => void;
@@ -38,6 +41,7 @@ interface AppState {
 
   toggleFavorite: (bookId: string) => boolean;
   isFavorite: (bookId: string) => boolean;
+  getBookAvailability: (bookId: string) => 'available' | 'reserved' | 'sold';
 
   getPriceHistory: (bookId?: string) => PricePoint[];
 }
@@ -61,6 +65,10 @@ const nowStr = () => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
+const appendTimeline = (order: Order, node: TimelineNode): Order => {
+  return { ...order, timeline: [...order.timeline, node], updateTime: nowStr() };
+};
+
 export const useAppStore = create<AppState>((set, get) => ({
   orders: [...mockOrders],
   bargainRecords: [],
@@ -74,6 +82,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   createOrder: (bookId, options = {}) => {
     const book = getBookById(bookId);
     if (!book) throw new Error('Book not found');
+    const now = nowStr();
     const newOrder: Order = {
       id: genOrderId(),
       bookId: book.id,
@@ -84,10 +93,21 @@ export const useAppStore = create<AppState>((set, get) => ({
       seller: book.seller,
       buyer: mockCurrentUser,
       status: 'reserved',
-      createTime: nowStr(),
-      updateTime: nowStr(),
+      timeline: [
+        { status: 'reserved', label: '发起预约', time: now, desc: `买家发起预订，价格¥${book.price}` }
+      ],
+      createTime: now,
+      updateTime: now,
       ...options
     };
+    if (newOrder.appointmentTime) {
+      newOrder.timeline.push({
+        status: 'reserved',
+        label: '预约时间地点',
+        time: now,
+        desc: `${newOrder.appointmentTime} · ${newOrder.pickupLocation || '待定'}`
+      });
+    }
     set((state) => ({ orders: [newOrder, ...state.orders] }));
     return newOrder;
   },
@@ -98,27 +118,101 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
   },
 
+  approveOrder: (orderId, newTime, newLocation) => {
+    set((state) => ({
+      orders: state.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        const desc = newTime
+          ? `卖家同意预约，时间调整为 ${newTime}${newLocation ? ' · ' + newLocation : ''}`
+          : '卖家同意预约';
+        const updated = appendTimeline(o, { status: 'approved', label: '卖家同意', time: nowStr(), desc });
+        return {
+          ...updated,
+          status: 'approved' as OrderStatus,
+          appointmentTime: newTime || o.appointmentTime,
+          pickupLocation: newLocation || o.pickupLocation
+        };
+      })
+    }));
+  },
+
+  rejectOrder: (orderId, reason) => {
+    set((state) => ({
+      orders: state.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        return appendTimeline(o, {
+          status: 'rejected',
+          label: '卖家拒绝',
+          time: nowStr(),
+          desc: reason || '卖家拒绝了本次预约'
+        });
+      }).map((o) =>
+        o.id === orderId ? { ...o, status: 'rejected' as OrderStatus } : o
+      )
+    }));
+  },
+
+  rescheduleOrder: (orderId, newTime, newLocation) => {
+    set((state) => ({
+      orders: state.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        const updated = appendTimeline(o, {
+          status: o.status,
+          label: '改约',
+          time: nowStr(),
+          desc: `时间改为 ${newTime}，地点改为 ${newLocation}`
+        });
+        return {
+          ...updated,
+          appointmentTime: newTime,
+          pickupLocation: newLocation
+        };
+      })
+    }));
+  },
+
   markPending: (orderId) => {
     set((state) => ({
-      orders: state.orders.map((o) =>
-        o.id === orderId ? { ...o, status: 'pending', updateTime: nowStr() } : o
-      )
+      orders: state.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        const updated = appendTimeline(o, {
+          status: 'pending',
+          label: '约好取书',
+          time: nowStr(),
+          desc: '买卖双方确认时间地点，等待线下取书'
+        });
+        return { ...updated, status: 'pending' as OrderStatus };
+      })
     }));
   },
 
   confirmPickup: (orderId) => {
     set((state) => ({
-      orders: state.orders.map((o) =>
-        o.id === orderId ? { ...o, status: 'completed', updateTime: nowStr() } : o
-      )
+      orders: state.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        const updated = appendTimeline(o, {
+          status: 'completed',
+          label: '确认取书',
+          time: nowStr(),
+          desc: '买家已线下取书，交易完成'
+        });
+        return { ...updated, status: 'completed' as OrderStatus };
+      })
     }));
   },
 
   reviewOrder: (orderId) => {
     set((state) => ({
-      orders: state.orders.map((o) =>
-        o.id === orderId ? { ...o, status: 'reviewed', updateTime: nowStr() } : o
-      )
+      orders: state.orders.map((o) => {
+        if (o.id !== orderId) return o;
+        const updated = appendTimeline(o, {
+          status: 'reviewed',
+          label: '评价完成',
+          time: nowStr(),
+          desc: '买家已评价，订单流程结束'
+        });
+        return { ...updated, status: 'reviewed' as OrderStatus };
+      })
     }));
   },
 
@@ -163,6 +257,15 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   isFavorite: (bookId) => {
     return get().favoriteBookIds.includes(bookId);
+  },
+
+  getBookAvailability: (bookId) => {
+    const { orders } = get();
+    const hasCompleted = orders.some(o => o.bookId === bookId && (o.status === 'completed' || o.status === 'reviewed'));
+    if (hasCompleted) return 'sold';
+    const hasActive = orders.some(o => o.bookId === bookId && ['reserved', 'approved', 'pending'].includes(o.status));
+    if (hasActive) return 'reserved';
+    return 'available';
   },
 
   getPriceHistory: (bookId) => {

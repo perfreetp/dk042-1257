@@ -12,13 +12,17 @@ import styles from './index.module.scss';
 
 const MinePage: React.FC = () => {
   const user = mockCurrentUser;
-  const { favoriteBookIds, toggleFavorite, orders } = useAppStore();
+  const { favoriteBookIds, toggleFavorite, orders, getBookAvailability } = useAppStore();
 
   const favBooks = useMemo(() => {
     return favoriteBookIds
-      .map(id => getBookById(id))
-      .filter(Boolean) as Book[];
-  }, [favoriteBookIds]);
+      .map(id => {
+        const book = getBookById(id);
+        if (!book) return null;
+        return { ...book, availability: getBookAvailability(id) };
+      })
+      .filter(Boolean) as (Book & { availability: 'available' | 'reserved' | 'sold' })[];
+  }, [favoriteBookIds, orders]);
 
   const stats = [
     { num: orders.length, label: '全部订单' },
@@ -211,6 +215,20 @@ const MinePage: React.FC = () => {
                     <Text className={styles.favPrice}>
                       <Text className={styles.yuan}>¥</Text>{book.price}
                     </Text>
+                    {book.availability === 'sold' && (
+                      <Text className={classnames(styles.availTag, styles.availSold)}>已售出</Text>
+                    )}
+                    {book.availability === 'reserved' && (
+                      <Text className={classnames(styles.availTag, styles.availReserved)}>已预订</Text>
+                    )}
+                    {book.availability === 'available' && (
+                      <Text
+                        className={styles.favBookBtn}
+                        onClick={() => Taro.navigateTo({ url: `/pages/appointment/index?id=${book.id}` })}
+                      >
+                        预约
+                      </Text>
+                    )}
                     <Text
                       className={styles.favRemove}
                       onClick={() => {

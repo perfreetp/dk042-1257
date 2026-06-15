@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, Image, Button } from '@tarojs/components';
+import { View, Text, Image, Button, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import type { Order, OrderStatus } from '@/types';
@@ -9,37 +9,57 @@ import styles from './index.module.scss';
 
 const STATUS_TABS: { key: OrderStatus | 'all'; label: string }[] = [
   { key: 'all', label: '全部' },
-  { key: 'reserved', label: '已预订' },
+  { key: 'reserved', label: '待确认' },
+  { key: 'approved', label: '已同意' },
   { key: 'pending', label: '待取书' },
   { key: 'completed', label: '已完成' },
   { key: 'reviewed', label: '已评价' }
 ];
 
+const statusDisplay: Record<OrderStatus, { text: string; cls: string }> = {
+  reserved: { text: '🕐 待卖家确认', cls: styles.statusReserved },
+  approved: { text: '✓ 卖家已同意', cls: styles.statusApproved },
+  pending: { text: '⏰ 待取书', cls: styles.statusPending },
+  completed: { text: '📦 交易完成', cls: styles.statusCompleted },
+  reviewed: { text: '⭐ 已评价', cls: styles.statusReviewed },
+  rejected: { text: '✕ 已拒绝', cls: styles.statusRejected }
+};
+
+const timelineIcon: Record<string, string> = {
+  reserved: '📝',
+  approved: '✅',
+  pending: '🤝',
+  completed: '📦',
+  reviewed: '⭐',
+  rejected: '❌'
+};
+
 const OrdersPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>('all');
-  const { orders, cancelOrder, markPending, confirmPickup, reviewOrder, updateOrderMemo } = useAppStore();
+  const {
+    orders, cancelOrder, approveOrder, rejectOrder,
+    rescheduleOrder, markPending, confirmPickup,
+    reviewOrder, updateOrderMemo
+  } = useAppStore();
 
   const displayedOrders = useMemo(() => {
-    if (activeTab === 'all') return orders;
+    if (activeTab === 'all') return orders.filter(o => o.status !== 'rejected');
     return orders.filter(o => o.status === activeTab);
   }, [orders, activeTab]);
 
-  const badgeCount = useMemo(() => {
-    return {
-      reserved: orders.filter(o => o.status === 'reserved').length,
-      pending: orders.filter(o => o.status === 'pending').length
-    };
+  const badgeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    STATUS_TABS.forEach(tab => {
+      if (tab.key === 'all') {
+        counts['all'] = orders.filter(o => o.status !== 'rejected').length;
+      } else {
+        counts[tab.key] = orders.filter(o => o.status === tab.key).length;
+      }
+    });
+    return counts;
   }, [orders]);
 
-  const statusDisplay: Record<OrderStatus, { text: string; cls: string }> = {
-    reserved: { text: '✓ 已预订', cls: styles.statusReserved },
-    pending: { text: '⏰ 待取书', cls: styles.statusPending },
-    completed: { text: '📦 交易完成', cls: styles.statusCompleted },
-    reviewed: { text: '⭐ 已评价', cls: styles.statusReviewed }
-  };
-
   const handleAction = (action: string, order: Order) => {
-    console.log('[Orders] action:', action, 'order:', order.id);
     switch (action) {
       case 'cancel':
         Taro.showModal({
@@ -54,9 +74,54 @@ const OrdersPage: React.FC = () => {
           }
         });
         break;
-      case 'pending':
+      case 'approve':
+        approveOrder(order.id);
+        Taro.showToast({ title: '已同意预约', icon: 'success' });
+        break;
+      case 'approve_reschedule':
         Taro.showModal({
-          title: '确认已约好取书时间',
+          title: '同意并调整时间',
+          content: '同意买家预约，但需要调整时间/地点？',
+          confirmText: '调整时间',
+          cancelText: '直接同意',
+          confirmColor: '#2B7FFF',
+          success: (res) => {
+            if (res.confirm) {
+              const book = require('@/data/books').getBookById(order.bookId);
+              const locations = book?.pickupLocations || ['东校区图书馆'];
+              Taro.showActionSheet({
+                itemList: locations,
+                success: (locRes) => {
+                  const newTime = '2026-06-20 15:00';
+                  approveOrder(order.id, newTime, locations[locRes.tapIndex]);
+                  Taro.showToast({ title: '已同意并改约', icon: 'success' });
+                }
+              });
+            } else {
+              approveOrder(order.id);
+              Taro.showToast({ title: '已同意预约', icon: 'success' });
+            }
+          }
+        });
+        break;
+      case 'reject':
+        Taro.showModal({
+          title: '拒绝预约',
+          content: '确定要拒绝买家的预约请求吗？',
+          confirmColor: '#f5222d',
+          editable: true,
+          placeholderText: '可以输入拒绝原因（选填）',
+          success: (res) => {
+            if (res.confirm) {
+              rejectOrder(order.id, res.content || undefined);
+              Taro.showToast({ title: '已拒绝预约', icon: 'success' });
+            }
+          }
+        });
+        break;
+      case 'confirm_arrival':
+        Taro.showModal({
+          title: '确认约好取书',
           content: '确认卖家已联系，取书时间地点已约定好，订单将进入"待取书"状态。',
           confirmColor: '#2B7FFF',
           success: (res) => {
@@ -86,6 +151,23 @@ const OrdersPage: React.FC = () => {
           success: () => {
             reviewOrder(order.id);
             Taro.showToast({ title: '评价成功', icon: 'success' });
+          }
+        });
+        break;
+      case 'reschedule':
+        Taro.showModal({
+          title: '改约时间地点',
+          editable: true,
+          placeholderText: '如：2026-06-20 15:00 南门快递点',
+          content: '',
+          success: (res) => {
+            if (res.confirm && res.content) {
+              const parts = res.content.split(/\s+/);
+              const newTime = parts[0] || order.appointmentTime || '';
+              const newLocation = parts.slice(1).join(' ') || order.pickupLocation || '';
+              rescheduleOrder(order.id, newTime, newLocation);
+              Taro.showToast({ title: '已改约', icon: 'success' });
+            }
           }
         });
         break;
@@ -124,10 +206,9 @@ const OrdersPage: React.FC = () => {
 
   return (
     <View className={styles.page}>
-      <View className={styles.tabsBar}>
+      <ScrollView className={styles.tabsBar} scrollX>
         {STATUS_TABS.map(tab => {
-          const showBadge = (tab.key === 'reserved' && badgeCount.reserved > 0)
-            || (tab.key === 'pending' && badgeCount.pending > 0);
+          const count = badgeCounts[tab.key] || 0;
           return (
             <View
               key={tab.key}
@@ -138,19 +219,17 @@ const OrdersPage: React.FC = () => {
               onClick={() => setActiveTab(tab.key)}
             >
               <Text>{tab.label}</Text>
-              {showBadge && (
+              {count > 0 && (
                 <View className={styles.badge}>
-                  <Text>
-                    {tab.key === 'reserved' ? badgeCount.reserved : badgeCount.pending}
-                  </Text>
+                  <Text>{count}</Text>
                 </View>
               )}
             </View>
           );
         })}
-      </View>
+      </ScrollView>
 
-      <View className={styles.listArea}>
+      <ScrollView className={styles.listArea} scrollY>
         {displayedOrders.length === 0 ? (
           <EmptyState
             icon="📋"
@@ -162,8 +241,8 @@ const OrdersPage: React.FC = () => {
             <View key={order.id} className={styles.orderCard}>
               <View className={styles.cardHeader}>
                 <Text className={styles.orderId}>订单号：{order.id}</Text>
-                <Text className={classnames(styles.statusText, statusDisplay[order.status].cls)}>
-                  {statusDisplay[order.status].text}
+                <Text className={classnames(styles.statusText, statusDisplay[order.status]?.cls)}>
+                  {statusDisplay[order.status]?.text}
                 </Text>
               </View>
 
@@ -193,7 +272,7 @@ const OrdersPage: React.FC = () => {
               </View>
 
               <View className={styles.cardFooter}>
-                {(order.appointmentTime || order.pickupLocation || order.memo) && (
+                {(order.appointmentTime || order.pickupLocation) && (
                   <View className={styles.appointment}>
                     {order.appointmentTime && (
                       <View className={styles.appointmentRow}>
@@ -209,10 +288,31 @@ const OrdersPage: React.FC = () => {
                     )}
                     {order.memo && (
                       <View className={styles.appointmentRow}>
-                        <Text className={styles.appointmentLabel}>交易备忘</Text>
+                        <Text className={styles.appointmentLabel}>备忘</Text>
                         <Text>{order.memo}</Text>
                       </View>
                     )}
+                  </View>
+                )}
+
+                {order.timeline.length > 0 && (
+                  <View className={styles.timelineSection}>
+                    <Text className={styles.timelineTitle}>交易进度</Text>
+                    {order.timeline.map((node, idx) => (
+                      <View key={idx} className={styles.timelineItem}>
+                        <View className={styles.timelineLeft}>
+                          <Text className={styles.timelineIcon}>{timelineIcon[node.status] || '📌'}</Text>
+                          {idx < order.timeline.length - 1 && <View className={styles.timelineLine} />}
+                        </View>
+                        <View className={styles.timelineRight}>
+                          <View className={styles.timelineRow}>
+                            <Text className={styles.timelineLabel}>{node.label}</Text>
+                            <Text className={styles.timelineTime}>{node.time}</Text>
+                          </View>
+                          {node.desc && <Text className={styles.timelineDesc}>{node.desc}</Text>}
+                        </View>
+                      </View>
+                    ))}
                   </View>
                 )}
 
@@ -230,18 +330,39 @@ const OrdersPage: React.FC = () => {
                   </Button>
                   {order.status === 'reserved' && (
                     <>
+                      <Button className={classnames(styles.btn, styles.btnSuccess)} onClick={() => handleAction('approve', order)}>
+                        同意
+                      </Button>
+                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('approve_reschedule', order)}>
+                        同意改约
+                      </Button>
+                      <Button className={classnames(styles.btn, styles.btnWarning)} onClick={() => handleAction('reject', order)}>
+                        拒绝
+                      </Button>
+                    </>
+                  )}
+                  {order.status === 'approved' && (
+                    <>
+                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('confirm_arrival', order)}>
+                        确认约好
+                      </Button>
+                      <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('reschedule', order)}>
+                        改约
+                      </Button>
                       <Button className={classnames(styles.btn, styles.btnWarning)} onClick={() => handleAction('cancel', order)}>
                         取消
-                      </Button>
-                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('pending', order)}>
-                        约好时间
                       </Button>
                     </>
                   )}
                   {order.status === 'pending' && (
-                    <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('confirm', order)}>
-                      确认取书
-                    </Button>
+                    <>
+                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('confirm', order)}>
+                        确认取书
+                      </Button>
+                      <Button className={classnames(styles.btn, styles.btnOutline)} onClick={() => handleAction('reschedule', order)}>
+                        改约
+                      </Button>
+                    </>
                   )}
                   {order.status === 'completed' && (
                     <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('review', order)}>
@@ -258,7 +379,7 @@ const OrdersPage: React.FC = () => {
             </View>
           ))
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 };

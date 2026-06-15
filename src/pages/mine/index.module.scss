@@ -271,6 +271,36 @@
   }
 }
 
+.availTag {
+  font-size: $font-size-xs;
+  padding: 4rpx 16rpx;
+  border-radius: 24rpx;
+  text-align: center;
+}
+
+.availSold {
+  background-color: rgba(245, 34, 45, 0.1);
+  color: $color-error;
+}
+
+.availReserved {
+  background-color: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+}
+
+.favBookBtn {
+  font-size: $font-size-xs;
+  padding: 4rpx 16rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
 .iconBlue { background-color: rgba(43, 127, 255, 0.1); }
 .iconGold { background-color: rgba(255, 197, 61, 0.15); }
 .iconGreen { background-color: rgba(0, 180, 42, 0.1); }

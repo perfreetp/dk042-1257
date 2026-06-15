@@ -28,7 +28,7 @@ const CategoryPage: React.FC = () => {
       c.courses.map(course => ({
         ...course,
         collegeName: c.name,
-        realCount: getBooksByCourse(course.id).length
+        realCount: getBooksByCourse(course.code).length
       }))
     );
     return all.sort((a, b) => b.realCount - a.realCount).slice(0, 4);
@@ -37,12 +37,16 @@ const CategoryPage: React.FC = () => {
   const collegeCourses = useMemo(() => {
     return activeCollege.courses.map(c => ({
       ...c,
-      realCount: getBooksByCourse(c.id).length
+      realCount: getBooksByCourse(c.code).length
     }));
   }, [activeCollege]);
 
   const displayBooks = useMemo(() => {
     if (activeCourseId) {
+      const course = mockColleges.flatMap(c => c.courses).find(c => c.id === activeCourseId);
+      if (course) {
+        return getBooksByCourse(course.code);
+      }
       return getBooksByCourse(activeCourseId);
     }
     return [];

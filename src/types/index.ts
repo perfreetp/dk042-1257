@@ -1,6 +1,13 @@
 export type BookCondition = '九成新' | '八成新' | '七成新' | '六成新及以下';
 
-export type OrderStatus = 'reserved' | 'pending' | 'completed' | 'reviewed';
+export type OrderStatus = 'reserved' | 'approved' | 'pending' | 'completed' | 'reviewed' | 'rejected';
+
+export interface TimelineNode {
+  status: string;
+  label: string;
+  time: string;
+  desc?: string;
+}
 
 export interface UserInfo {
   id: string;
@@ -75,6 +82,7 @@ export interface Order {
   pickupLocation?: string;
   bargainPrice?: number;
   memo?: string;
+  timeline: TimelineNode[];
   createTime: string;
   updateTime: string;
 }

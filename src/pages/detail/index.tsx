@@ -14,7 +14,7 @@ const DetailPage: React.FC = () => {
   const router = useRouter();
   const bookId = router.params.id || 'b001';
   const book: Book | undefined = useMemo(() => getBookById(bookId), [bookId]);
-  const { toggleFavorite, isFavorite, getPriceHistory } = useAppStore();
+  const { toggleFavorite, isFavorite, getPriceHistory, getBookAvailability, orders } = useAppStore();
 
   const [currentImg, setCurrentImg] = useState(0);
   const [isFav, setIsFav] = useState(false);
@@ -22,6 +22,8 @@ const DetailPage: React.FC = () => {
   useEffect(() => {
     setIsFav(isFavorite(bookId));
   }, [bookId, isFavorite]);
+
+  const bookAvailability = useMemo(() => getBookAvailability(bookId), [bookId, orders]);
 
   const priceHistory = useMemo(() => getPriceHistory(bookId), [bookId, getPriceHistory]);
 
@@ -304,24 +306,50 @@ const DetailPage: React.FC = () => {
         </View>
 
         <View className={styles.mainBtns}>
-          <Button
-            className={classnames(styles.btn, styles.btnSecondary)}
-            onClick={() => handleAction('bargain')}
-          >
-            💰 砍价
-          </Button>
-          <Button
-            className={classnames(styles.btn, styles.btnSecondary)}
-            onClick={() => handleAction('book')}
-          >
-            📅 预约验书
-          </Button>
-          <Button
-            className={classnames(styles.btn, styles.btnPrimary, styles.btnLarge)}
-            onClick={() => handleAction('reserve')}
-          >
-            ✓ 立即预订
-          </Button>
+          {bookAvailability === 'sold' ? (
+            <Button
+              className={classnames(styles.btn, styles.btnSecondary)}
+              disabled
+            >
+              📦 已售出
+            </Button>
+          ) : bookAvailability === 'reserved' ? (
+            <>
+              <Button
+                className={classnames(styles.btn, styles.btnSecondary)}
+                onClick={() => handleAction('bargain')}
+              >
+                💰 砍价
+              </Button>
+              <Button
+                className={classnames(styles.btn, styles.btnSecondary)}
+                onClick={() => handleAction('alert')}
+              >
+                🔔 到货提醒
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                className={classnames(styles.btn, styles.btnSecondary)}
+                onClick={() => handleAction('bargain')}
+              >
+                💰 砍价
+              </Button>
+              <Button
+                className={classnames(styles.btn, styles.btnSecondary)}
+                onClick={() => handleAction('book')}
+              >
+                📅 预约验书
+              </Button>
+              <Button
+                className={classnames(styles.btn, styles.btnPrimary, styles.btnLarge)}
+                onClick={() => handleAction('reserve')}
+              >
+                ✓ 立即预订
+              </Button>
+            </>
+          )}
         </View>
       </View>
     </ScrollView>
