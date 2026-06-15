@@ -3,7 +3,7 @@ import { View, Text, Image, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import type { Order, OrderStatus } from '@/types';
-import { mockOrders, getOrdersByStatus } from '@/data/orders';
+import { useAppStore } from '@/store/app';
 import EmptyState from '@/components/EmptyState';
 import styles from './index.module.scss';
 
@@ -17,18 +17,19 @@ const STATUS_TABS: { key: OrderStatus | 'all'; label: string }[] = [
 
 const OrdersPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>('all');
+  const { orders, cancelOrder, confirmPickup, reviewOrder, updateOrderMemo } = useAppStore();
 
   const displayedOrders = useMemo(() => {
-    if (activeTab === 'all') return mockOrders;
-    return getOrdersByStatus(activeTab);
-  }, [activeTab]);
+    if (activeTab === 'all') return orders;
+    return orders.filter(o => o.status === activeTab);
+  }, [orders, activeTab]);
 
   const badgeCount = useMemo(() => {
     return {
-      reserved: getOrdersByStatus('reserved').length,
-      pending: getOrdersByStatus('pending').length
+      reserved: orders.filter(o => o.status === 'reserved').length,
+      pending: orders.filter(o => o.status === 'pending').length
     };
-  }, []);
+  }, [orders]);
 
   const statusDisplay: Record<OrderStatus, { text: string; cls: string }> = {
     reserved: { text: '✓ 已预订', cls: styles.statusReserved },
@@ -47,6 +48,7 @@ const OrdersPage: React.FC = () => {
           confirmColor: '#f5222d',
           success: (res) => {
             if (res.confirm) {
+              cancelOrder(order.id);
               Taro.showToast({ title: '已取消预订', icon: 'success' });
             }
           }
@@ -59,19 +61,45 @@ const OrdersPage: React.FC = () => {
           confirmColor: '#00b42a',
           success: (res) => {
             if (res.confirm) {
+              confirmPickup(order.id);
               Taro.showToast({ title: '交易已完成', icon: 'success' });
             }
           }
         });
         break;
       case 'review':
-        Taro.showToast({ title: '评价功能开发中', icon: 'none' });
+        Taro.showActionSheet({
+          itemList: ['⭐ 好评（5星）', '👍 中评（3星）', '👎 差评（1星）'],
+          success: () => {
+            reviewOrder(order.id);
+            Taro.showToast({ title: '评价成功', icon: 'success' });
+          }
+        });
         break;
       case 'memo':
         Taro.showActionSheet({
           itemList: ['添加交易备忘', '举报盗版嫌疑', '标记爽约记录', '查看价格走势'],
           success: (res) => {
-            Taro.showToast({ title: `选择了第${res.tapIndex + 1}项`, icon: 'none' });
+            if (res.tapIndex === 0) {
+              Taro.showModal({
+                title: '添加交易备忘',
+                editable: true,
+                placeholderText: '记录重要交易信息',
+                content: order.memo || '',
+                success: (result) => {
+                  if (result.confirm && result.content) {
+                    updateOrderMemo(order.id, result.content);
+                    Taro.showToast({ title: '备忘已保存', icon: 'success' });
+                  }
+                }
+              });
+            } else if (res.tapIndex === 1) {
+              Taro.showToast({ title: '举报已提交', icon: 'success' });
+            } else if (res.tapIndex === 2) {
+              Taro.showToast({ title: '已记录爽约标记', icon: 'none' });
+            } else if (res.tapIndex === 3) {
+              Taro.navigateTo({ url: '/pages/pricechart/index' });
+            }
           }
         });
         break;
@@ -99,7 +127,9 @@ const OrdersPage: React.FC = () => {
               <Text>{tab.label}</Text>
               {showBadge && (
                 <View className={styles.badge}>
-                  <Text>{tab.key === 'reserved' ? badgeCount.reserved : badgeCount.pending}</Text>
+                  <Text>
+                    {tab.key === 'reserved' ? badgeCount.reserved : badgeCount.pending}
+                  </Text>
                 </View>
               )}
             </View>
@@ -150,7 +180,7 @@ const OrdersPage: React.FC = () => {
               </View>
 
               <View className={styles.cardFooter}>
-                {(order.appointmentTime || order.pickupLocation) && (
+                {(order.appointmentTime || order.pickupLocation || order.memo) && (
                   <View className={styles.appointment}>
                     {order.appointmentTime && (
                       <View className={styles.appointmentRow}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Input, ScrollView } from '@tarojs/components';
 import classnames from 'classnames';
 import styles from './index.module.scss';
@@ -31,6 +31,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSearch
 }) => {
   const [inputValue, setInputValue] = useState(value);
+
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
 
   const handleInput = (e: any) => {
     const v = e.detail.value;

@@ -88,6 +88,157 @@
 .hotInfo { flex: 1; min-width: 0; }
 .hotName { font-size: $font-size-md; color: $color-text-primary; font-weight: $font-weight-medium; @include text-ellipsis; }
 .hotSub { font-size: $font-size-xs; color: $color-text-tertiary; margin-top: 4rpx; }
+.hotRight { display: flex; flex-direction: column; align-items: flex-end; gap: 4rpx; }
 .hotTrend { font-size: $font-size-sm; font-weight: $font-weight-semibold; flex-shrink: 0; }
+.viewText { font-size: $font-size-xs; color: $color-primary; }
 .trendDown { color: $color-success; }
 .trendUp { color: $color-error; }
+
+.bookInfoCard {
+  display: flex;
+  flex-direction: row;
+  padding: $spacing-md;
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.bookCover {
+  width: 120rpx;
+  height: 170rpx;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.bookInfo {
+  flex: 1;
+  margin-left: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.bookTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis-multi(2);
+}
+
+.bookMeta {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  @include text-ellipsis;
+}
+
+.bookCourse {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  margin-top: 4rpx;
+  @include text-ellipsis;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+}
+
+.currentPrice {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.priceNum {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+  margin-left: 8rpx;
+}
+
+.priceStats {
+  display: flex;
+  justify-content: space-around;
+  padding: $spacing-md 0;
+  border-top: 2rpx solid $color-divider;
+  margin-top: $spacing-md;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 4rpx;
+}
+
+.statValue {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.priceLow { color: $color-success; }
+.priceHigh { color: $color-error; }
+
+.viewDetailBtn {
+  @include button-reset;
+  width: 100%;
+  height: 80rpx;
+  background-color: $color-primary-bg;
+  color: $color-primary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-md;
+  margin-top: $spacing-md;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.tipsCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.tipItem {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: $spacing-md;
+}
+
+.tipIcon {
+  font-size: 48rpx;
+  flex-shrink: 0;
+}
+
+.tipContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.tipTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.tipDesc {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.5;
+}

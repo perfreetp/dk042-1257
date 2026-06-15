@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro, { usePullDownRefresh, useReachBottom } from '@tarojs/taro';
 import SearchBar, { SearchType } from '@/components/SearchBar';
@@ -9,11 +9,13 @@ import Tag from '@/components/Tag';
 import { mockBooks, searchBooks } from '@/data/books';
 import { mockColleges } from '@/data/colleges';
 import type { Book, BookCondition } from '@/types';
+import { useAppStore } from '@/store/app';
 import styles from './index.module.scss';
 
 const HomePage: React.FC = () => {
-  const [keyword, setKeyword] = useState('');
-  const [searchType, setSearchType] = useState<SearchType>('all');
+  const { searchKeyword, searchType, setSearchKeyword, setSearchType } = useAppStore();
+  const [keyword, setKeyword] = useState(searchKeyword);
+  const [type, setType] = useState<SearchType>(searchType);
   const [filter, setFilter] = useState<FilterState>({
     conditions: [],
     hasNotes: null,
@@ -22,6 +24,14 @@ const HomePage: React.FC = () => {
   });
   const [displayCount, setDisplayCount] = useState(10);
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    setKeyword(searchKeyword);
+  }, [searchKeyword]);
+
+  useEffect(() => {
+    setType(searchType);
+  }, [searchType]);
 
   usePullDownRefresh(() => {
     setRefreshing(true);
@@ -39,7 +49,7 @@ const HomePage: React.FC = () => {
   });
 
   const filteredBooks = useMemo(() => {
-    let list: Book[] = searchBooks(keyword, searchType);
+    let list: Book[] = searchBooks(keyword, type);
 
     if (filter.conditions.length > 0) {
       list = list.filter(b => filter.conditions.includes(b.condition as BookCondition));
@@ -63,15 +73,36 @@ const HomePage: React.FC = () => {
     }
 
     return list;
-  }, [keyword, searchType, filter]);
+  }, [keyword, type, filter]);
 
   const displayBooks = filteredBooks.slice(0, displayCount);
+
+  const handleSearch = (kw: string, t: SearchType) => {
+    setKeyword(kw);
+    setType(t);
+    setSearchKeyword(kw);
+    setSearchType(t);
+    setDisplayCount(10);
+  };
+
+  const handleTypeChange = (t: SearchType) => {
+    setType(t);
+    setSearchType(t);
+    setDisplayCount(10);
+  };
+
+  const handleKeywordChange = (kw: string) => {
+    setKeyword(kw);
+  };
 
   const handleEntry = (type: string, payload?: string) => {
     console.log('[Home] entry click:', type, payload);
     if (type === 'college' && payload) {
       setKeyword(payload);
+      setSearchKeyword(payload);
+      setType('college');
       setSearchType('college');
+      setDisplayCount(10);
     } else if (type === 'alert') {
       Taro.navigateTo({ url: '/pages/bookalert/index' });
     } else if (type === 'trend') {
@@ -109,14 +140,10 @@ const HomePage: React.FC = () => {
 
       <SearchBar
         value={keyword}
-        type={searchType}
-        onSearch={(kw, t) => {
-          setKeyword(kw);
-          setSearchType(t);
-          setDisplayCount(10);
-        }}
-        onTypeChange={setSearchType}
-        onChange={setKeyword}
+        type={type}
+        onSearch={handleSearch}
+        onTypeChange={handleTypeChange}
+        onChange={handleKeywordChange}
       />
 
       <View className={styles.sectionHeader}>

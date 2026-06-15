@@ -1,26 +1,418 @@
 @use '@/styles/variables.scss' as *;
 
-.wrapper {
+.page {
   min-height: 100vh;
-  padding: $spacing-xl $page-padding;
+  background-color: $color-bg-page;
+  padding-bottom: 120rpx;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.icon { font-size: 160rpx; margin-bottom: $spacing-xl; opacity: 0.6; }
-.title { font-size: $font-size-xl; font-weight: $font-weight-semibold; color: $color-text-primary; margin-bottom: $spacing-md; }
-.desc { font-size: $font-size-md; color: $color-text-tertiary; text-align: center; line-height: 1.8; max-width: 520rpx; }
-.tipBox {
-  margin-top: $spacing-xl;
+.bookCard {
+  display: flex;
+  flex-direction: row;
   padding: $spacing-lg;
+  margin: $spacing-md $page-padding;
   background-color: $color-bg-card;
   border-radius: $radius-lg;
   box-shadow: $shadow-card;
-  width: 100%;
-  max-width: 600rpx;
 }
-.tipTitle { font-size: $font-size-md; font-weight: $font-weight-semibold; color: $color-primary; margin-bottom: $spacing-md; }
-.tipItem { font-size: $font-size-sm; color: $color-text-secondary; line-height: 2; display: flex; align-items: flex-start; gap: $spacing-sm; }
-.tipDot { color: $color-gold; }
+
+.bookCover {
+  width: 160rpx;
+  height: 220rpx;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.bookInfo {
+  flex: 1;
+  margin-left: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.bookTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: 1.4;
+  @include text-ellipsis-multi(2);
+}
+
+.bookMeta {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: 8rpx;
+  @include text-ellipsis;
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.currentPrice {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+}
+
+.yuan {
+  font-size: $font-size-md;
+  margin-right: 2rpx;
+}
+
+.originalPrice {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  text-decoration: line-through;
+}
+
+.formSection,
+.resultSection,
+.historySection {
+  margin: $spacing-md $page-padding;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.formItem {
+  margin-bottom: $spacing-lg;
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.priceInputWrap {
+  display: flex;
+  align-items: center;
+  background-color: $color-bg-input;
+  border-radius: $radius-md;
+  padding: 0 $spacing-md;
+  height: 88rpx;
+}
+
+.priceSymbol {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-price;
+  margin-right: 8rpx;
+}
+
+.priceInput {
+  flex: 1;
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.suggestedPrices {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.suggestLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.priceTag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-xs $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-sm;
+  border: 2rpx solid $color-border;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.priceTagActive {
+  background-color: $color-primary-bg;
+  border-color: $color-primary;
+
+  :global {
+    text {
+      color: $color-primary;
+    }
+  }
+}
+
+.priceTagLabel {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  margin-top: 2rpx;
+}
+
+.textarea {
+  width: 100%;
+  height: 180rpx;
+  background-color: $color-bg-input;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  box-sizing: border-box;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: 1.5;
+}
+
+.tipBox {
+  padding: $spacing-md;
+  background-color: $color-primary-bg;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+}
+
+.tipTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.tipItem {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.8;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-xs;
+}
+
+.tipDot {
+  color: $color-gold;
+}
+
+.submitBtn {
+  @include button-reset;
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-button;
+  box-shadow: 0 8rpx 24rpx rgba(43, 127, 255, 0.3);
+
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+.resultSuccess {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-lg 0 $spacing-xl;
+}
+
+.resultIcon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-success 0%, #23c343 100%);
+  color: white;
+  font-size: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-md;
+}
+
+.resultTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.resultDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  text-align: center;
+}
+
+.recordCard {
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.recordTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.recordRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xs 0;
+  font-size: $font-size-sm;
+}
+
+.recordLabel {
+  color: $color-text-tertiary;
+}
+
+.recordValue {
+  color: $color-text-secondary;
+  max-width: 400rpx;
+  text-align: right;
+  @include text-ellipsis;
+}
+
+.recordPrice {
+  color: $color-price;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-md;
+}
+
+.statusTag {
+  padding: 4rpx 12rpx;
+  background-color: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+}
+
+.actionRow {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.actionBtn {
+  @include button-reset;
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+}
+
+.btnOutline {
+  background-color: transparent;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+
+  &:active {
+    background-color: $color-bg-hover;
+  }
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.historySection {
+  margin-top: $spacing-lg;
+}
+
+.historyItem {
+  display: flex;
+  flex-direction: row;
+  padding: $spacing-md 0;
+  border-bottom: 2rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.historyCover {
+  width: 100rpx;
+  height: 140rpx;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.historyInfo {
+  flex: 1;
+  margin-left: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.historyTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.historyMeta {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.historyPriceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.historyPrice {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.historySlash {
+  color: $color-text-disabled;
+  margin: 0 4rpx;
+}
+
+.historyStatus {
+  padding: 4rpx 12rpx;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+}
+
+.statusPending {
+  background-color: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+}
+
+.statusAccepted {
+  background-color: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+}
+
+.statusRejected {
+  background-color: rgba(245, 34, 45, 0.1);
+  color: $color-error;
+}

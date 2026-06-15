@@ -1,34 +1,427 @@
 @use '@/styles/variables.scss' as *;
 
-.wrapper {
+.page {
   min-height: 100vh;
-  padding: $spacing-xl $page-padding;
+  background-color: $color-bg-page;
+  padding-bottom: 200rpx;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
-.icon { font-size: 160rpx; margin-bottom: $spacing-xl; opacity: 0.6; }
-.title { font-size: $font-size-xl; font-weight: $font-weight-semibold; color: $color-text-primary; margin-bottom: $spacing-md; }
-.desc { font-size: $font-size-md; color: $color-text-tertiary; text-align: center; line-height: 1.8; max-width: 520rpx; }
-
-.features {
-  margin-top: $spacing-xl;
+.bookCard {
   display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-  width: 100%;
-  max-width: 600rpx;
-}
-.featureItem {
+  flex-direction: row;
   padding: $spacing-lg;
+  margin: $spacing-md $page-padding;
   background-color: $color-bg-card;
   border-radius: $radius-lg;
   box-shadow: $shadow-card;
+}
+
+.bookCover {
+  width: 140rpx;
+  height: 200rpx;
+  border-radius: $radius-sm;
+  flex-shrink: 0;
+}
+
+.bookInfo {
+  flex: 1;
+  margin-left: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.bookTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: 1.4;
+  @include text-ellipsis-multi(2);
+}
+
+.bookMeta {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: 8rpx;
+  @include text-ellipsis;
+}
+
+.sellerRow {
   display: flex;
   align-items: center;
+  gap: $spacing-sm;
+  margin-top: $spacing-xs;
+}
+
+.sellerName {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.sellerCredit {
+  font-size: $font-size-xs;
+  color: $color-gold;
+  font-weight: $font-weight-medium;
+}
+
+.price {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+  margin-top: $spacing-sm;
+}
+
+.yuan {
+  font-size: $font-size-sm;
+  margin-right: 2rpx;
+}
+
+.section {
+  margin: $spacing-md $page-padding;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.dateScroll {
+  @include scroll-x-container;
+  overflow-x: auto;
+  margin: 0 (-$spacing-lg);
+  padding: 0 $spacing-lg;
+}
+
+.dateItem {
+  @include scroll-x-item(120rpx);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-md $spacing-sm;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  margin-right: $spacing-sm;
+  border: 2rpx solid transparent;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.dateItemActive {
+  background-color: $color-primary-bg;
+  border-color: $color-primary;
+
+  :global {
+    text {
+      color: $color-primary;
+    }
+  }
+}
+
+.dateWeekDay {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.dateText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-top: 4rpx;
+}
+
+.timeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-sm;
+}
+
+.timeItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md $spacing-sm;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.timeItemActive {
+  background-color: $color-primary-bg;
+  border-color: $color-primary;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.locationList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.locationItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.locationItemActive {
+  background-color: $color-primary-bg;
+  border-color: $color-primary;
+}
+
+.locationCheck {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid $color-border;
+  margin-right: $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.locationItemActive .locationCheck {
+  background-color: $color-primary;
+  border-color: $color-primary;
+}
+
+.checkIcon {
+  font-size: 24rpx;
+  color: white;
+  font-weight: $font-weight-bold;
+}
+
+.locationText {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.locationItemActive .locationText {
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.textarea {
+  width: 100%;
+  height: 160rpx;
+  background-color: $color-bg-input;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  box-sizing: border-box;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: 1.5;
+}
+
+.tipBox {
+  margin: $spacing-md $page-padding;
+  padding: $spacing-md;
+  background-color: $color-primary-bg;
+  border-radius: $radius-md;
+}
+
+.tipTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.tipItem {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.8;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-xs;
+}
+
+.tipDot {
+  color: $color-gold;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding: $spacing-md $page-padding;
+  background-color: $color-bg-card;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  z-index: 100;
+}
+
+.priceInfo {
+  flex: 1;
+}
+
+.priceLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.finalPrice {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-price;
+  margin-top: 4rpx;
+}
+
+.submitBtn {
+  @include button-reset;
+  width: 280rpx;
+  height: 88rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-button;
+  box-shadow: 0 8rpx 24rpx rgba(43, 127, 255, 0.3);
+
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+.submitBtnDisabled {
+  background: $color-text-disabled;
+  box-shadow: none;
+  color: $color-text-white;
+
+  &:active {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.resultSection {
+  margin: $spacing-md $page-padding;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-lg;
+}
+
+.resultSuccess {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-lg 0 $spacing-xl;
+}
+
+.resultIcon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-success 0%, #23c343 100%);
+  color: white;
+  font-size: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-md;
+}
+
+.resultTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.resultDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  text-align: center;
+}
+
+.infoCard {
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: $spacing-xs 0;
+  font-size: $font-size-sm;
+}
+
+.infoLabel {
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.infoValue {
+  color: $color-text-secondary;
+  max-width: 420rpx;
+  text-align: right;
+}
+
+.actionRow {
+  display: flex;
   gap: $spacing-md;
 }
-.featureIcon { font-size: 48rpx; }
-.featureText { font-size: $font-size-md; color: $color-text-secondary; font-weight: $font-weight-medium; }
+
+.actionBtn {
+  @include button-reset;
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+}
+
+.btnOutline {
+  background-color: transparent;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+
+  &:active {
+    background-color: $color-bg-hover;
+  }
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+
+  &:active {
+    opacity: 0.85;
+  }
+}

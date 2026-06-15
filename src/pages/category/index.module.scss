@@ -192,3 +192,75 @@
   color: $color-text-tertiary;
   margin-left: $spacing-sm;
 }
+
+.collegeCount {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.activeCollege .collegeCount {
+  color: $color-tag-text;
+  font-weight: $font-weight-medium;
+}
+
+.collegeSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.collegeTotal {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  background-color: $color-bg-hover;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-round;
+}
+
+.countTag {
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.activeCourse {
+  background-color: $color-primary-bg;
+  border: 2rpx solid $color-primary;
+}
+
+.bookListSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  border-bottom: 2rpx solid $color-divider;
+}
+
+.sectionSub {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  display: block;
+}
+
+.backBtn {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  padding: $spacing-xs $spacing-sm;
+  background-color: $color-primary-bg;
+  border-radius: $radius-round;
+}
+
+.bookList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
