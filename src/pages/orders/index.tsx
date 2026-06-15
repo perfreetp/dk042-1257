@@ -17,7 +17,7 @@ const STATUS_TABS: { key: OrderStatus | 'all'; label: string }[] = [
 
 const OrdersPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>('all');
-  const { orders, cancelOrder, confirmPickup, reviewOrder, updateOrderMemo } = useAppStore();
+  const { orders, cancelOrder, markPending, confirmPickup, reviewOrder, updateOrderMemo } = useAppStore();
 
   const displayedOrders = useMemo(() => {
     if (activeTab === 'all') return orders;
@@ -50,6 +50,19 @@ const OrdersPage: React.FC = () => {
             if (res.confirm) {
               cancelOrder(order.id);
               Taro.showToast({ title: '已取消预订', icon: 'success' });
+            }
+          }
+        });
+        break;
+      case 'pending':
+        Taro.showModal({
+          title: '确认已约好取书时间',
+          content: '确认卖家已联系，取书时间地点已约定好，订单将进入"待取书"状态。',
+          confirmColor: '#2B7FFF',
+          success: (res) => {
+            if (res.confirm) {
+              markPending(order.id);
+              Taro.showToast({ title: '已推进至待取书', icon: 'success' });
             }
           }
         });
@@ -220,8 +233,8 @@ const OrdersPage: React.FC = () => {
                       <Button className={classnames(styles.btn, styles.btnWarning)} onClick={() => handleAction('cancel', order)}>
                         取消
                       </Button>
-                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('detail', order)}>
-                        联系卖家
+                      <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={() => handleAction('pending', order)}>
+                        约好时间
                       </Button>
                     </>
                   )}

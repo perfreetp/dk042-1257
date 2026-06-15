@@ -1,19 +1,27 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { mockCurrentUser } from '@/data/users';
-import { mockBooks, mockPriceHistory } from '@/data/books';
-import { mockOrders } from '@/data/orders';
+import { getBookById, mockPriceHistory } from '@/data/books';
 import BookCard from '@/components/BookCard';
 import PriceTrendChart from '@/components/PriceTrendChart';
+import EmptyState from '@/components/EmptyState';
+import { useAppStore } from '@/store/app';
+import type { Book } from '@/types';
 import styles from './index.module.scss';
 
 const MinePage: React.FC = () => {
   const user = mockCurrentUser;
-  const favBooks = mockBooks.slice(0, 3);
+  const { favoriteBookIds, toggleFavorite, orders } = useAppStore();
+
+  const favBooks = useMemo(() => {
+    return favoriteBookIds
+      .map(id => getBookById(id))
+      .filter(Boolean) as Book[];
+  }, [favoriteBookIds]);
 
   const stats = [
-    { num: mockOrders.length, label: '全部订单' },
+    { num: orders.length, label: '全部订单' },
     { num: user.tradeCount, label: '交易次数' },
     { num: favBooks.length, label: '我的收藏' },
     { num: 0, label: '发布中' }
@@ -177,26 +185,46 @@ const MinePage: React.FC = () => {
             <Text>⭐ 我的收藏</Text>
             <Text className={styles.sectionMore} onClick={() => handleMenuClick('favorites')}>全部 ›</Text>
           </View>
-          <View className={styles.favList}>
-            {favBooks.map(book => (
-              <View
-                key={book.id}
-                className={styles.favItem}
-                onClick={() => Taro.navigateTo({ url: `/pages/detail/index?id=${book.id}` })}
-              >
-                <View className={styles.favCover}>
-                  <Image style={{ width: '100%', height: '100%' }} src={book.cover} mode="aspectFill" />
+          {favBooks.length === 0 ? (
+            <EmptyState icon="⭐" title="暂无收藏" desc="去首页逛逛，收藏心仪的教材吧~" />
+          ) : (
+            <View className={styles.favList}>
+              {favBooks.map(book => (
+                <View
+                  key={book.id}
+                  className={styles.favItem}
+                >
+                  <View
+                    className={styles.favCover}
+                    onClick={() => Taro.navigateTo({ url: `/pages/detail/index?id=${book.id}` })}
+                  >
+                    <Image style={{ width: '100%', height: '100%' }} src={book.cover} mode="aspectFill" />
+                  </View>
+                  <View
+                    className={styles.favInfo}
+                    onClick={() => Taro.navigateTo({ url: `/pages/detail/index?id=${book.id}` })}
+                  >
+                    <Text className={styles.favTitle}>{book.title}</Text>
+                    <Text className={styles.favMeta}>{book.condition} · {book.course}</Text>
+                  </View>
+                  <View className={styles.favRight}>
+                    <Text className={styles.favPrice}>
+                      <Text className={styles.yuan}>¥</Text>{book.price}
+                    </Text>
+                    <Text
+                      className={styles.favRemove}
+                      onClick={() => {
+                        toggleFavorite(book.id);
+                        Taro.showToast({ title: '已取消收藏', icon: 'success' });
+                      }}
+                    >
+                      取消
+                    </Text>
+                  </View>
                 </View>
-                <View className={styles.favInfo}>
-                  <Text className={styles.favTitle}>{book.title}</Text>
-                  <Text className={styles.favMeta}>{book.condition} · {book.course}</Text>
-                </View>
-                <Text className={styles.favPrice}>
-                  <Text className={styles.yuan}>¥</Text>{book.price}
-                </Text>
-              </View>
-            ))}
-          </View>
+              ))}
+            </View>
+          )}
         </View>
       </View>
     </ScrollView>

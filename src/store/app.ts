@@ -29,6 +29,7 @@ interface AppState {
 
   createOrder: (bookId: string, options?: Partial<Order>) => Order;
   cancelOrder: (orderId: string) => void;
+  markPending: (orderId: string) => void;
   confirmPickup: (orderId: string) => void;
   reviewOrder: (orderId: string) => void;
   updateOrderMemo: (orderId: string, memo: string) => void;
@@ -94,6 +95,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   cancelOrder: (orderId) => {
     set((state) => ({
       orders: state.orders.filter((o) => o.id !== orderId)
+    }));
+  },
+
+  markPending: (orderId) => {
+    set((state) => ({
+      orders: state.orders.map((o) =>
+        o.id === orderId ? { ...o, status: 'pending', updateTime: nowStr() } : o
+      )
     }));
   },
 

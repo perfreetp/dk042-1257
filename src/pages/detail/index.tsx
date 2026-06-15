@@ -1,21 +1,29 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, Image, Swiper, SwiperItem, Button, ScrollView } from '@tarojs/components';
 import Taro, { useRouter, useShareAppMessage } from '@tarojs/taro';
 import classnames from 'classnames';
 import type { Book } from '@/types';
-import { getBookById, mockBooks, mockPriceHistory } from '@/data/books';
+import { getBookById, mockBooks } from '@/data/books';
 import Tag from '@/components/Tag';
 import PriceTrendChart from '@/components/PriceTrendChart';
 import EmptyState from '@/components/EmptyState';
+import { useAppStore } from '@/store/app';
 import styles from './index.module.scss';
 
 const DetailPage: React.FC = () => {
   const router = useRouter();
   const bookId = router.params.id || 'b001';
   const book: Book | undefined = useMemo(() => getBookById(bookId), [bookId]);
+  const { toggleFavorite, isFavorite, getPriceHistory } = useAppStore();
 
   const [currentImg, setCurrentImg] = useState(0);
   const [isFav, setIsFav] = useState(false);
+
+  useEffect(() => {
+    setIsFav(isFavorite(bookId));
+  }, [bookId, isFavorite]);
+
+  const priceHistory = useMemo(() => getPriceHistory(bookId), [bookId, getPriceHistory]);
 
   useShareAppMessage(() => ({
     title: `${book?.title} - 书易换二手教材`,
@@ -39,9 +47,10 @@ const DetailPage: React.FC = () => {
     console.log('[Detail] action:', action);
     switch (action) {
       case 'favorite':
-        setIsFav(f => !f);
+        const newFav = toggleFavorite(bookId);
+        setIsFav(newFav);
         Taro.showToast({
-          title: isFav ? '已取消收藏' : '收藏成功',
+          title: newFav ? '收藏成功' : '已取消收藏',
           icon: 'success'
         });
         break;
@@ -207,7 +216,7 @@ const DetailPage: React.FC = () => {
             查看详情 ›
           </Text>
         </View>
-        <PriceTrendChart data={mockPriceHistory} title={`《${book.course}》同教材近6月行情`} />
+        <PriceTrendChart data={priceHistory} title={`《${book.course}》同教材近6月行情`} />
       </View>
 
       <View className={styles.sectionCard}>

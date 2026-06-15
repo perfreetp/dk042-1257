@@ -438,7 +438,8 @@ export const getBookById = (id: string): Book | undefined => {
 };
 
 export const getBooksByCourse = (courseCode: string): Book[] => {
-  return mockBooks.filter(book => book.courseCode === courseCode);
+  const code = courseCode.toUpperCase();
+  return mockBooks.filter(book => book.courseCode.toUpperCase() === code);
 };
 
 export const getBooksByCollege = (college: string): Book[] => {
